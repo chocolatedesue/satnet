@@ -1,0 +1,13 @@
+{
+    "task": "Oct",
+    "data_dir": "/home/chenyuxuan/satnet/data/gs-sat-bj-only/Oct1st",
+    "begin": 0,
+    "end": 86400,
+    "step": 10,
+    "sat_num": 3600,
+    "gs_num": 1,
+    "yaw_speed": 3,
+    "pitch_speed": 3,
+    "output_dir": "output",
+    "mode": "build"
+}

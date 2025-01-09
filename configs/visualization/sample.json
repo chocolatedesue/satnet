@@ -1,0 +1,39 @@
+{
+    "name": "Visualization Sample",
+    "constellation": {
+        "num_of_orbit_planes": 60,
+        "num_of_satellites_per_plane": 60,
+        "relative_spacing": 1,
+        "inclination": 53,
+        "altitude": 550
+    },
+    
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.00,
+        "propagation_speed": 299792458
+    },
+
+    "start_time": 100,
+    "step_length": 10,
+    "duration": 600,
+
+    "update_period": 60,
+    "refresh_period": 600,
+
+    "isl_state_dir": "/home/chenyuxuan/satnet/data/xw-sat-data/isl-sun-outage",
+    "sat_position_dir": "/home/chenyuxuan/satnet/data/xw-sat-data/sat-geocentric-position",
+    "sat_lla_dir": "/home/chenyuxuan/satnet/data/xw-sat-data/sat-subpoint-position",
+    "sat_velocity_dir": "/home/chenyuxuan/satnet/data/xw-sat-data/sat-move-direction",
+    "dawn_dusk_dir": "/home/chenyuxuan/satnet/data/xw-sat-data/dawn-dusk-line",
+
+    "report_dir": "output",
+    
+    "visualization": {
+        "source": 973,
+        "destination": -1,
+        "frames_dir": "visualization/frame_data",
+        "scenario": "Orbit - Full",
+        "diff_table": 2
+    }
+}

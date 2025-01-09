@@ -1,0 +1,15 @@
+{
+    "task": "Apr-multi-ant",
+    "data_dir": "/home/chenyuxuan/satnet/data/gs-sat-bj-multi-ant/Apr1st",
+    "begin": 0,
+    "end": 86400,
+    "step": 10,
+    "sat_num": 3600,
+    "gs_num": 18,
+    "multi_ant_gs_num": 1,
+    "ant_num": 10,
+    "yaw_speed": 3,
+    "pitch_speed": 3,
+    "output_dir": "output",
+    "mode": "build"
+}

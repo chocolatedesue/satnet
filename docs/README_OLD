@@ -1,0 +1,75 @@
+星间网络仿真实验 (Simulation)
+
+0. 准备工作
+
+安装前置软件
+$ apt install g++ make tmux python3
+
+安装 Python 依赖包
+$ pip install -r requirements.txt
+
+1. 编译仿真程序
+
+使用 make 构建可执行文件
+$ make main
+
+编译花费约一分钟，请耐心等待。
+
+2. 准备卫星运行数据
+
+准备卫星运行数据，包括星间链路状态、卫星的空间坐标与经纬度坐标、卫星的运行方向。
+
+数据目录结构应与 configs/full.json 保持一致。 
+
+3. 执行实验脚本
+
+创建输出目录，用于保存实验结果（也可以修改 configs/full.json 指定输出目录）
+$ mkdir output
+
+使用 tmux 新建一个会话，在会话中执行实验脚本
+$ scripts/run_all.sh 
+
+退出会话，等待程序运行完毕。
+
+4. 收集实验结果
+
+运行实验结果汇总程序
+$ python summary.py
+
+汇总的实验结果将保存至当前目录下的 'summary.csv'。
+
+-----------------------------------------------
+
+星间网络可视化
+
+1. 准备帧数据
+
+创建帧数据目录
+$ mkdir visualization/frame_data
+
+运行帧数据生成程序
+$ python genframes.py
+
+2. 配置前端
+
+安装 apache2
+$ apt install apache2
+
+修改 WebSocket 配置 ws_url
+$ nano visualization/frontend/config.js
+
+将前端数据复制到 /var/www/html
+$ cp -r visualization/frontend /var/www/html
+
+3. 启动后端
+
+进入后端程序所在目录
+$ cd visualization/backend
+
+修改 WebSocketServer 配置，与 ws_url 保持一致
+$ nano server.py
+
+运行后端程序
+$ python server.py
+
+后端程序启动时需要花费一定时间缓存帧数据，请耐心等待。

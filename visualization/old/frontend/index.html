@@ -1,0 +1,289 @@
+<html>
+
+<head>
+    <title>Satellite Network Simulation</title>
+
+    <style type="text/css">
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid black;
+        }
+
+        div {
+            height: 40px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        select {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<script type="text/javascript" src="config.js"></script>
+
+<script>
+    const ws = new WebSocket(ws_url);
+    var config = {};
+
+    ws.addEventListener('open', function (event) {
+        console.log("WebSocket is open now.");
+        ws.send(JSON.stringify({
+            "action" : "open"
+        }));
+        resizeCanvas();
+    });
+    ws.addEventListener('close', function (event) {
+        console.log("WebSocket is closed now.");
+    });
+    ws.addEventListener('error', function (event) {
+        console.log('WebSocket error: ', event);
+    });
+    ws.addEventListener('message', function (event) {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "config") {
+            config = msg.content;
+            reloadScenarioSelection();
+        } else if (msg.type === "frame") {
+            renderFrame(msg.content);
+        }
+    });
+
+    const background = new Image();
+    background.src = 'earth.png';
+    background.addEventListener("load", function (event) {
+        resizeCanvas();
+    });
+
+    const numframes = 60;
+    var curframe = 0;
+    var isplaying = false;
+
+    window.addEventListener("resize", function (event) {
+        resizeCanvas();
+    });
+
+    window.addEventListener("keypress", function (event) {
+        if (event.code == "Space") {
+            if (isplaying == false) {
+                isplaying = true;
+                requestNextFrame();
+            } else {
+                isplaying = false;
+            }
+        } else if(event.code == "KeyZ") {
+            isplaying = false;
+            requestLastFrame();
+        } else if(event.code == "KeyX") {
+            isplaying = false;
+            requestNextFrame();
+        } else if(event.code == "KeyC") {
+            reloadFrame();
+        }
+    });
+
+    function getScenario() {
+        return document.getElementById('scenario-select').value;
+    }
+
+    function getAlgorithm() {
+        return document.getElementById('algorithm-select').value;
+    }
+
+    function requestLastFrame() {
+        const scenario = getScenario();
+        const algorithm = getAlgorithm();
+
+        if (curframe > 0) {
+            curframe = curframe - 1;
+            ws.send(JSON.stringify({
+                "action": "request_frame",
+                "scenario": scenario,
+                "algorithm": algorithm,
+                "frame_id": curframe
+            }));
+            console.log("Request last frame: " + String([scenario, algorithm, curframe]));
+        }
+    }
+    function requestNextFrame() {
+        const scenario = getScenario();
+        const algorithm = getAlgorithm();
+
+        if (curframe + 1 < numframes) {
+            curframe = curframe + 1;
+            ws.send(JSON.stringify({
+                "action": "request_frame",
+                "scenario": scenario,
+                "algorithm": algorithm,
+                "frame_id": curframe
+            }));
+            console.log("Request next frame: " + String([scenario, algorithm, curframe]));
+        } else {
+            isplaying = false;
+        }
+
+        if (isplaying) {
+            window.setTimeout(requestNextFrame, 1000);
+        }
+    }
+
+    function resizeCanvas() {
+        const canvas = document.getElementById("canvas");
+        if (canvas) {
+            canvas.height = Math.min(window.innerHeight - 100, (window.innerWidth - 50) / 2);
+            canvas.width = canvas.height * 2;
+            reloadFrame();
+        }
+    }
+
+    function clearSelectElement(id) {
+        const selectElement = document.getElementById(id);
+        while (selectElement.children.length > 1) {
+            selectElement.removeChild(selectElement.lastElementChild);
+        }
+    }
+
+
+    function addToSelectElement(id, optionList) {
+        if(optionList) {
+            const selectElement = document.getElementById(id);
+            for(const option of optionList) {
+                const optionElement = document.createElement("option");
+                optionElement.setAttribute("value", option);
+                optionElement.appendChild(document.createTextNode(option));
+                selectElement.appendChild(optionElement);
+            }
+        }
+    }
+
+    function reloadScenarioSelection() {
+        clearSelectElement("scenario-select");
+        clearSelectElement("algorithm-select");
+        addToSelectElement("scenario-select", Object.keys(config));
+    }
+
+    function reloadAlgorithmSelection() {
+        clearSelectElement("algorithm-select");
+        addToSelectElement("algorithm-select", config[getScenario()]);
+        reloadFrame();
+    }
+
+    function reloadFrame() {
+        curframe = 0;
+        isplaying = false;
+        if(ws.readyState == 1) {
+            ws.send(JSON.stringify({
+                "action": "request_frame",
+                "scenario": getScenario(),
+                "algorithm": getAlgorithm(),
+                "frame_id": curframe
+            }));
+        }
+    }
+
+    function getCanvasCoord(node, width, height) {
+        return [(node[0] / 360 + 1 / 2) * width,
+        (-node[1] / 180 + 1 / 2) * height];
+    }
+
+    function find(src, dst, width, height) {
+        var rx = dst[0], ry = dst[1];
+        for (const d of [-1, 1]) {
+            const dx = dst[0] + d * width;
+            const dy = dst[1] + d * height;
+            if (Math.abs(dx - src[0]) < Math.abs(rx - src[0])) {
+                rx = dx;
+            }
+            if (Math.abs(dy - src[1]) < Math.abs(ry - src[1])) {
+                ry = dy;
+            }
+        }
+        return [rx, ry];
+    }
+
+    function renderFrame(frame) {
+        const canvas = document.getElementById("canvas");
+        const width = canvas.width;
+        const height = canvas.height;
+        const ctx = canvas.getContext('2d');
+
+        console.log("Rendering frame " + String(frame.id) + "...");
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(background, 0, 0, width, height);
+        for (node of frame.nodes) {
+            const c = getCanvasCoord(node, width, height);
+            for (sty of style["node_1"]) {
+                if (node[2] == sty[0]) {
+                    ctx.fillStyle = sty[1];
+                    ctx.beginPath();
+                    ctx.arc(c[0], c[1], sty[2], 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                }
+            }
+        }
+        for (edge of frame.edges) {
+            const u = getCanvasCoord(frame.nodes[edge[0]], width, height);
+            const v = getCanvasCoord(frame.nodes[edge[1]], width, height);
+            for (sty of style["edge"]) {
+                if(edge[2] == sty[0]) {
+                    ctx.strokeStyle = sty[1]
+                    ctx.lineWidth = sty[2]
+                    ctx.setLineDash(sty[3])
+                    if(sty[0] == 4) {
+                        ctx.beginPath();
+                        ctx.moveTo(u[0], u[1]);
+                        ctx.lineTo(v[0], v[1]);
+                        ctx.stroke();
+                        break;
+                    }
+                    const w = find(u, v, width, height);
+                    ctx.beginPath();
+                    ctx.moveTo(u[0], u[1]);
+                    ctx.lineTo(w[0], w[1]);
+                    ctx.stroke();
+                    if (!(w[0] == v[0] && w[1] == v[1])) {
+                        const t = find(v, u, width, height);
+                        ctx.beginPath();
+                        ctx.moveTo(v[0], v[1]);
+                        ctx.lineTo(t[0], t[1]);
+                        ctx.stroke();
+                    }
+                    break;
+                }
+            }
+        }
+        for (node of frame.nodes) {
+            const c = getCanvasCoord(node, width, height);
+            for (sty of style["node_2"]) {
+                if (node[2] == sty[0]) {
+                    ctx.fillStyle = sty[1];
+                    ctx.beginPath();
+                    ctx.arc(c[0], c[1], sty[2], 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                }
+            }
+        }
+        console.log("Done.");
+    }
+
+</script>
+
+<body>
+    <div>
+        <label for="scenario-select"> Scenario: </label>
+        <select id="scenario-select" onchange="reloadAlgorithmSelection()">
+            <option value="" selected>--Choose a scenario--</option>
+        </select>
+        <label for="algorithm-select"> Algorithm: </label>
+        <select id="algorithm-select" onchange="reloadFrame()">
+            <option value="" selected>--Choose an algorithm--</option>
+        </select>
+    </div>
+    <canvas id="canvas" onload="resizeCanvas()"></canvas>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+{
+    "name": "GW-A59-3 Test",
+    "constellation": {
+        "num_of_orbit_planes": 60,
+        "num_of_satellites_per_plane": 60,
+        "relative_spacing": 1,
+        "inclination": 53,
+        "altitude": 550
+    },
+    
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.00,
+        "propagation_speed": 299792458
+    },
+
+    "start_time": 0,
+    "duration": 600,
+    "step_length": 10,
+    "update_period": 60,    
+
+    "num_latency_observers": 10,
+    "random_seed": 17,
+
+    "isl_state_dir": "data/xw-sat-data/isl-sun-outage",
+    "sat_position_dir": "data/xw-sat-data/sat-geocentric-position",
+    "sat_lla_dir": "data/xw-sat-data/sat-subpoint-position",
+    "sat_velocity_dir": "data/xw-sat-data/sat-move-direction",
+    "report_dir": "output",
+
+    "visualization": {
+        "source": 952,
+        "destination": -1,
+        "frames_dir": "/home/chenyuxuan/satnet/simulation/visualization/frame_data",
+        "file_name": "Test - .txt"
+    }
+}

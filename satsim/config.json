@@ -1,0 +1,200 @@
+{
+    "Walker 70": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Beijing - London",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto",
+            "California - London",
+            "California - Beijing & Hong Kong - Rio de Janeiro"
+        ],
+        "numframes": 600
+    },
+    "Starlink-1": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "Starlink-2": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "Starlink-3": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "Starlink-4": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "OneWeb": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "Telesat-1": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "Telesat-2": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "GW-A59-1": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "GW-A59-2": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "GW-A59-3": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "GW-2-1": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "GW-2-2": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "GW-2-3": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    },
+    "GW-2-4": {
+        "scenarios": [
+            "Beijing - Washington, DC",
+            "Beijing - Moscow",
+            "Beijing - Tokyo",
+            "Hong Kong - Rio de Janeiro",
+            "Hong Kong - London",
+            "London - Moscow",
+            "Sydney - Capetown",
+            "California - Toronto"
+        ],
+        "numframes": 600
+    }
+}

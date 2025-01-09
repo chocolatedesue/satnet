@@ -1,0 +1,13 @@
+satsim/constellations
+__pycache__
+.vscode
+main
+a.out
+a.txt
+data
+output*
+cdf_plot_data
+frame_data
+summary*.csv
+plot_figs
+rib

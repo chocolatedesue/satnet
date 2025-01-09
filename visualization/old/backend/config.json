@@ -1,0 +1,27 @@
+{
+    "file_list": [
+        "default.txt",
+        "Jan 1st - .txt",
+        "Apr 1st - .txt",
+        "Jul 1st - .txt",
+        "Oct 1st - .txt",
+        "Sun Outage (1 year) - .txt",
+        "Orbit Movement - .txt",
+        "Route Path - Dijkstra.txt",
+        "Route Path - DisCoRoute.txt",
+        "Route Path - DomainBridge.txt",
+        "Route Table - Dijkstra.txt",
+        "Route Table - DisCoRoute.txt",
+        "Route Table - DomainBridge.txt"
+    ],
+    "config": {
+        "Jan 1st": [],
+        "Apr 1st": [],
+        "Jul 1st": [],
+        "Oct 1st": [],
+        "Sun Outage (1 year)": [],
+        "Orbit Movement": [],
+        "Route Path": ["Dijkstra", "DisCoRoute", "DomainBridge"],
+        "Route Table": ["Dijkstra", "DisCoRoute", "DomainBridge"]        
+    }
+}
