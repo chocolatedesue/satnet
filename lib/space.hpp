@@ -513,7 +513,7 @@ private:
     }
 
     void dump_table(int src) {
-        for(int i = 0; i < N; i++) {
+        for(int i = 0; i < N; i++) { 
             if(i != src) {
                 if(show_diff_table == 0) {
                     if((sat_vel[src] > 0) == (sat_vel[i] > 0)) {

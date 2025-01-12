@@ -26,12 +26,7 @@
     "sat_position_dir": "data/xw-sat-data/sat-geocentric-position",
     "sat_lla_dir": "data/xw-sat-data/sat-subpoint-position",
     "sat_velocity_dir": "data/xw-sat-data/sat-move-direction",
-    "report_dir": "output",
+    "report_dir": "output"
 
-    "visualization": {
-        "source": 952,
-        "destination": -1,
-        "frames_dir": "/home/chenyuxuan/satnet/simulation/visualization/frame_data",
-        "file_name": "Test - .txt"
-    }
+
 }
