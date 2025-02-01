@@ -1,2 +1,2 @@
 main: main.cpp lib/*
-	g++ main.cpp -o main -Ofast -std=c++17
+	g++ -g main.cpp -o main -std=c++17

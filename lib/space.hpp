@@ -242,7 +242,7 @@ private:
         fprintf(fout, "number of observers: %d\n", num_observers);
         for(int i = 0; i < num_observers; i++) {
             auto src = latency_observers[i].first;
-            auto dst = latency_observers[i].second;
+            auto dst = latency_observers[i].second; 
             auto latency = latency_results[i].getResult();
             auto failure_rate = failure_rates[i].getResult();
             fprintf(fout, "route path [%d, %d]\n\tlatency: %f\n\tfailure rate: %f\n", src, dst, latency, failure_rate);
