@@ -108,19 +108,21 @@ private:
         } else if(dir == 2) {
             if(x == P - 1) {
                 x = 0;
-                y = (y + F) % Q;
+                
             } else {
                 x = x + 1;
             }
+            y = (y + F) % Q;
         } else if(dir == 3) {
             y = (y + 1) % Q;
         } else if(dir == 4) {
             if(x == 0) {
                 x = P - 1;
-                y = (y - F + Q) % Q;
+                
             } else {
                 x = x - 1;
             }
+            y = (y - F + Q) % Q;
         } else {
             // do nothing   
         }
@@ -157,6 +159,7 @@ private:
             int next_hop = route_table[dst];
             if(next_hop == 0 || cur_banned[cur][next_hop] || path_vis[cur] == path_timer) {
                 success = false;
+                latency = DBL_MAX;
                 break;
             }
             path_vis[cur] = path_timer;
