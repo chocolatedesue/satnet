@@ -95,9 +95,11 @@ if __name__ == "__main__":
     algorithmIdDict = getAlgoritmIdDict("main.cpp")
     target_list = []
 #    target_list += ["GW-A59-3 - Transit"]
-    target_list += ["GW-A59-3 (24 hour) - Jan", "GW-A59-3 (24 hour) - Apr", "GW-A59-3 (24 hour) - Jul", "GW-A59-3 (24 hour) - Oct"]
+    # target_list += ["GW-A59-3 (24 hour) - Jan", "GW-A59-3 (24 hour) - Apr", "GW-A59-3 (24 hour) - Jul", "GW-A59-3 (24 hour) - Oct"]
 #    target_list += ["GW-A59-2 (24 hour) - Jan", "GW-A59-2 (24 hour) - Apr", "GW-A59-2 (24 hour) - Jul", "GW-A59-2 (24 hour) - Oct"]
 #    target_list += ["GW-2-1 (24 hour) - Jan", "GW-2-1 (24 hour) - Apr", "GW-2-1 (24 hour) - Jul", "GW-2-1 (24 hour) - Oct"]
+
+    target_list += ["full example - dijkstraBase"]
 
     algo_mapping = {
         "DiffDomainBridge_10_3" : "DomainBridge",
@@ -108,7 +110,8 @@ if __name__ == "__main__":
         "DisCoRouteBase" : "DisCoRoute",
         "DijkstraPred" : "DT-DVTR",
         "MinHopCount" : "FSA-LA",
-        "LBP" : "LBP"
+        "LBP" : "LBP",
+        "DijkstraBase" : "DijkstraBase"
     }
     
 

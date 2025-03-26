@@ -1,10 +1,25 @@
 #ifndef SATSIM_SPACE_HPP_
 #define SATSIM_SPACE_HPP_
 
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h>
+#include<vector>
+#include<set>
+#include<map>
+#include<queue>
+#include<ctime>
+#include<cstdio>
+#include<algorithm>
+#include<cfloat>
+#include<iostream>
+#include<fstream>
+#include<cstring>
+#include <climits>
+#include<cmath>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <random>
 #include "dirent.h"
+
 
 #include "utils.h"
 
@@ -23,7 +38,7 @@ using json = nlohmann::json;
 
 class Average {
 private:
-    double sum;
+    double sum,mx;
     int cnt;
 
 public:
@@ -31,10 +46,15 @@ public:
         sum = 0.0, cnt = 0;
     }
     void add(double val) {
+        if (val == -1) {
+            val = 2 * mx;
+        } else mx = std::max (mx,val);
         sum += val, cnt++;
+        
     }
     double getResult() {
         return cnt ? sum / cnt : 0;
+
     }
 };
 
@@ -100,6 +120,9 @@ private:
 
     int show_diff_table;
 
+    std::mt19937 random_engine; 
+    // std::uniform_int_distribution<int> node_distribution;
+
     int move(int id,int dir) {
         int x = id / Q;
         int y = id % Q;
@@ -159,7 +182,7 @@ private:
             int next_hop = route_table[dst];
             if(next_hop == 0 || cur_banned[cur][next_hop] || path_vis[cur] == path_timer) {
                 success = false;
-                latency = DBL_MAX;
+                latency = -1;
                 break;
             }
             path_vis[cur] = path_timer;
@@ -209,6 +232,36 @@ private:
         }
     }
 
+    void introduce_random_error() {
+        // std::uniform_real_distribution<int> distribution(0, );
+        if (N < 8) {
+            std::cout << "Total number of nodes is less than 8, cannot introduce random error" << std::endl;
+            return;
+        }
+        int val = N;
+        int max_cnt = val / 4;
+        int min_cnt = val / 8;
+        
+        // 确保有效的分布区间
+        if (min_cnt >= max_cnt) {
+            min_cnt = std::max(0, max_cnt - 1);
+        }
+        
+        int fail_cnt = (min_cnt == max_cnt) ? min_cnt : 
+        std::uniform_int_distribution<int>(min_cnt, max_cnt)(random_engine);
+
+        for(int i = 0; i < fail_cnt; i++) {
+            int u = std::uniform_int_distribution<int>(0, N - 1)(random_engine);
+            int v = move (u, 1 + std::uniform_int_distribution<int>(0, 3)(random_engine));
+            int u_port, v_port;
+            if(getPort(u, v, u_port, v_port)) {
+                cur_banned[u][u_port] = 1;
+                cur_banned[v][v_port] = 1;
+            }
+        }
+
+    }
+
     void load_cur_banned() {
         clearIslState(cur_banned);
         readIslStateFlie(cur_time, cur_banned);
@@ -249,6 +302,7 @@ private:
             auto latency = latency_results[i].getResult();
             auto failure_rate = failure_rates[i].getResult();
             fprintf(fout, "route path [%d, %d]\n\tlatency: %f\n\tfailure rate: %f\n", src, dst, latency, failure_rate);
+            std::cout << "route path [" << src << ", " << dst << "]" << "\n\tlatency: " << latency << "\n\tfailure rate: " << failure_rate << std::endl;
         }
         fclose(fout);
     }
@@ -262,6 +316,7 @@ public:
         Q = config["constellation"]["num_of_satellites_per_plane"];
         F = config["constellation"]["relative_spacing"];
         N = P * Q;
+        // node_distribution =  std::uniform_int_distribution<int>(1, N); 
 
         proc_delay = config["ISL_latency"]["processing_delay"];
         prop_delay_coef = config["ISL_latency"]["propagation_delay_coef"];
@@ -313,6 +368,12 @@ public:
             output_frames = false;
         }
 
+        if (!config.count("seed")) {
+            seed = 42;
+        } else {
+            seed = config["seed"];
+        }
+        random_engine = std::mt19937(seed);
         if(config.count("num_latency_observers")) {
             num_observers = config["num_latency_observers"];
             if(num_observers == -1) {
@@ -325,14 +386,22 @@ public:
                 }
                 num_observers = latency_observers.size();
             } else {
-                seed = config["random_seed"];
-                srand(seed);
+                std::set<std::pair<int, int> > observer_set;
                 for(int i = 0; i < num_observers; i++) {
                     int u, v;
                     do {
-                        u = rand() % N;
-                        v = rand() % N;
+                        // u = rand() % N;
+                        // v = rand() % N;
+                        u = std::uniform_int_distribution<int>(0, N - 1)(random_engine);
+                        // v = random_engine() % N;
+                        int direct = std::uniform_int_distribution<int>(0, 3)(random_engine);
+                        v = move(u, 1 + direct );
                     } while(u == v);
+                    if (observer_set.count(std::make_pair(u, v))) {
+                        i--;
+                    } else {
+                        observer_set.insert(std::make_pair(u, v));
+                    }
                     latency_observers.push_back(std::make_pair(u, v));
                 }
             }
@@ -348,17 +417,19 @@ public:
             }
         }
 
+        cur_banned = std::vector<std::array<int, 5> >(N);
+        futr_banned = std::vector<std::array<int, 5> >(N);
+        sat_pos = std::vector<std::array<double, 3> >(N);
+        sat_lla = std::vector<std::array<double, 3> >(N);
+        sat_vel = std::vector<double>(N);
+
         World world(&cur_banned, &futr_banned, &sat_pos, &sat_lla, &sat_vel);
         for(int i = 0; i < N; i++) {
             nodes.push_back(T(config, i, world));
         }
         algorithm = nodes[0].getName();
 
-        cur_banned = std::vector<std::array<int, 5> >(N);
-        futr_banned = std::vector<std::array<int, 5> >(N);
-        sat_pos = std::vector<std::array<double, 3> >(N);
-        sat_lla = std::vector<std::array<double, 3> >(N);
-        sat_vel = std::vector<double>(N);
+
         route_tables = std::vector<std::vector<int> >(N, std::vector<int>(N));
 
         path_timer = 0;
@@ -379,6 +450,8 @@ public:
             name.c_str(), algorithm.c_str(), my_tm->tm_year + 1900, my_tm->tm_mon + 1, my_tm->tm_mday,
             my_tm->tm_hour, my_tm->tm_min, my_tm->tm_sec);
         */
+       
+
     }
 
 
@@ -392,6 +465,7 @@ public:
             load_sat_pos();
             load_sat_lla();
             load_sat_vel();
+            introduce_random_error();
 
             if(cur_time % update_period == 0) {
                 load_futr_banned();
@@ -423,7 +497,7 @@ public:
                 }
             }
 
-            if(cur_time % refresh_period == 0) {
+            if(cur_time && cur_time % refresh_period == 0) {
                 report();
             }
 
@@ -447,11 +521,11 @@ public:
                 auto dst = latency_observers[i].second;
                 auto [latency, success] = computeLatency(src, dst);
                 if(success) {
-                    latency_results[i].add(latency);
                     failure_rates[i].add(0);
                 } else {
                     failure_rates[i].add(1);
                 }
+                latency_results[i].add(latency);
             }
         }
         report();
@@ -653,6 +727,11 @@ private:
         }
         fclose(fout);
     }
+
+    // ~SpaceSimulation() {
+    //     // 清理可能需要特殊处理的资源
+    //     nodes.clear();
+    // }
 
 };
 
