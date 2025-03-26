@@ -1,11 +1,11 @@
 {
     "name": "GW-A59-3 (24 hours)",
     "constellation": {
-        "num_of_orbit_planes": 60,
-        "num_of_satellites_per_plane": 60,
+        "num_of_orbit_planes": 30,
+        "num_of_satellites_per_plane": 30,
         "relative_spacing": 1,
-        "inclination": 53,
-        "altitude": 550
+        "inclination": 50,
+        "altitude": 600
     },
     
     "ISL_latency": {
@@ -22,9 +22,9 @@
     "num_latency_observers": 100000,
     "random_seed": 17,
 
-    "isl_state_dir": "data/xw-sat-data/isl-sun-outage",
-    "sat_position_dir": "data/xw-sat-data/sat-geocentric-position",
-    "sat_lla_dir": "data/xw-sat-data/sat-subpoint-position",
-    "sat_velocity_dir": "data/xw-sat-data/sat-move-direction",
+    "isl_state_dir": "data/326gen/isl-sun-outage",
+    "sat_position_dir": "data/326gen/sat-geocentric-position",
+    "sat_lla_dir": "data/326gen/sat-subpoint-position",
+    "sat_velocity_dir": "data/326gen/sat-move-direction",
     "report_dir": "output"
 }

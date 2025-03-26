@@ -3,8 +3,11 @@ import json
 import math
 import os
 
-portNum = 11311
-loadDirs = ["/home/chenyuxuan/satnet/visualization/frame_data", "/home/linrunbo/satvis-minimal/visualization/frame_data", "/home/phye/satvis-minimal/visualization/frame_data"]
+portNum = 12311
+# loadDirs = ["/home/chenyuxuan/satnet/visualization/frame_data", "/home/linrunbo/satvis-minimal/visualization/frame_data", "/home/phye/satvis-minimal/visualization/frame_data"]
+loadDirs = [
+    "visualization/frame_data/"
+]
 defaultFrame = {
     "id" : -1, "nodes" : [], "edges" : [], "nodes_3d" : [], "num_frames" : 0
 }
@@ -88,6 +91,7 @@ def load(filename):
     return nodeList, edgeList, node3dList
 
 if __name__ == "__main__":
-    server = WebsocketServer(host='192.168.1.14', port=portNum)
+    # server = WebsocketServer(host='192.168.1.14', port=portNum)
+    server = WebsocketServer(host='127.0.0.1', port=portNum)
     server.set_fn_message_received(message_received)
     server.run_forever()
