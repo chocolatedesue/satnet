@@ -47,7 +47,7 @@ public:
     }
     void add(double val) {
         if (val == -1) {
-            val = 2 * mx;
+            val = 1.5 * mx;
         } else mx = std::max (mx,val);
         sum += val, cnt++;
         
@@ -386,7 +386,7 @@ public:
         random_engine = std::mt19937(seed);
         
         if (!config.count("observer_config_path")) {
-            std::cout << "No observer config path found" << std::endl;
+            std::cout << "No observer_config_path found in config json" << std::endl;
             exit(1);
         }
 
