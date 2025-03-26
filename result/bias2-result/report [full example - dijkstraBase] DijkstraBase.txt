@@ -1,0 +1,1971 @@
+name: full example - dijkstraBase
+algorithm: DijkstraBase
+node type: 12DijkstraNode
+simulation time: 9000
+real-world time: 134.611364
+estimated time of arrival: 0.000000
+compute time: 0.956720
+update entry: 36.353721
+number of observers: 654
+route path [114, 25]
+	latency: 72.369566
+	failure rate: 0.474444
+route path [759, 281]
+	latency: 365.305769
+	failure rate: 0.917778
+route path [250, 228]
+	latency: 100.484561
+	failure rate: 0.784444
+route path [142, 754]
+	latency: 342.511103
+	failure rate: 0.925556
+route path [104, 692]
+	latency: 336.789336
+	failure rate: 0.856667
+route path [758, 558]
+	latency: 295.174883
+	failure rate: 0.950000
+route path [89, 604]
+	latency: 377.158757
+	failure rate: 0.941111
+route path [432, 32]
+	latency: 440.521765
+	failure rate: 0.918889
+route path [30, 95]
+	latency: 71.705854
+	failure rate: 0.431111
+route path [223, 238]
+	latency: 146.742606
+	failure rate: 0.941111
+route path [517, 616]
+	latency: 135.236515
+	failure rate: 0.618889
+route path [27, 574]
+	latency: 366.374465
+	failure rate: 0.927778
+route path [203, 733]
+	latency: 366.303004
+	failure rate: 0.895556
+route path [665, 718]
+	latency: 81.070754
+	failure rate: 0.562222
+route path [558, 429]
+	latency: 161.976482
+	failure rate: 0.664444
+route path [225, 459]
+	latency: 272.796398
+	failure rate: 0.887778
+route path [603, 284]
+	latency: 408.714497
+	failure rate: 0.936667
+route path [828, 890]
+	latency: 43.966947
+	failure rate: 0.318889
+route path [6, 777]
+	latency: 153.368811
+	failure rate: 0.668889
+route path [825, 163]
+	latency: 223.001243
+	failure rate: 0.804444
+route path [714, 432]
+	latency: 330.781032
+	failure rate: 0.854444
+route path [348, 284]
+	latency: 59.676429
+	failure rate: 0.397778
+route path [159, 220]
+	latency: 41.733379
+	failure rate: 0.344444
+route path [781, 344]
+	latency: 481.362181
+	failure rate: 0.940000
+route path [104, 94]
+	latency: 85.356545
+	failure rate: 0.598889
+route path [389, 99]
+	latency: 344.431290
+	failure rate: 0.925556
+route path [367, 867]
+	latency: 425.893968
+	failure rate: 0.913333
+route path [352, 618]
+	latency: 281.516782
+	failure rate: 0.848889
+route path [270, 826]
+	latency: 421.758317
+	failure rate: 0.922222
+route path [44, 747]
+	latency: 313.298839
+	failure rate: 0.923333
+route path [470, 549]
+	latency: 181.794828
+	failure rate: 0.804444
+route path [127, 387]
+	latency: 313.592979
+	failure rate: 0.895556
+route path [80, 565]
+	latency: 434.799794
+	failure rate: 0.945556
+route path [300, 849]
+	latency: 411.132398
+	failure rate: 0.942222
+route path [643, 633]
+	latency: 86.312427
+	failure rate: 0.618889
+route path [882, 370]
+	latency: 379.572770
+	failure rate: 0.920000
+route path [591, 196]
+	latency: 384.102259
+	failure rate: 0.910000
+route path [721, 71]
+	latency: 243.803796
+	failure rate: 0.750000
+route path [46, 677]
+	latency: 242.371994
+	failure rate: 0.818889
+route path [233, 791]
+	latency: 372.594508
+	failure rate: 0.950000
+route path [296, 81]
+	latency: 212.051036
+	failure rate: 0.750000
+route path [875, 238]
+	latency: 274.942388
+	failure rate: 0.881111
+route path [887, 103]
+	latency: 125.309968
+	failure rate: 0.668889
+route path [389, 284]
+	latency: 212.775956
+	failure rate: 0.803333
+route path [464, 650]
+	latency: 185.237737
+	failure rate: 0.686667
+route path [854, 373]
+	latency: 392.805752
+	failure rate: 0.924444
+route path [166, 379]
+	latency: 191.075708
+	failure rate: 0.705556
+route path [363, 214]
+	latency: 134.364322
+	failure rate: 0.722222
+route path [686, 273]
+	latency: 435.122768
+	failure rate: 0.935556
+route path [718, 699]
+	latency: 97.261838
+	failure rate: 0.646667
+route path [663, 73]
+	latency: 307.978765
+	failure rate: 0.836667
+route path [623, 650]
+	latency: 41.935318
+	failure rate: 0.375556
+route path [175, 546]
+	latency: 455.900968
+	failure rate: 0.918889
+route path [746, 250]
+	latency: 462.080637
+	failure rate: 0.946667
+route path [167, 473]
+	latency: 306.583019
+	failure rate: 0.840000
+route path [388, 276]
+	latency: 147.847680
+	failure rate: 0.724444
+route path [655, 704]
+	latency: 150.589564
+	failure rate: 0.724444
+route path [570, 224]
+	latency: 444.108330
+	failure rate: 0.981111
+route path [701, 332]
+	latency: 399.829348
+	failure rate: 0.897778
+route path [863, 786]
+	latency: 174.232317
+	failure rate: 0.790000
+route path [794, 57]
+	latency: 198.796123
+	failure rate: 0.752222
+route path [234, 841]
+	latency: 302.970486
+	failure rate: 0.867778
+route path [32, 824]
+	latency: 211.772771
+	failure rate: 0.851111
+route path [323, 410]
+	latency: 95.094588
+	failure rate: 0.592222
+route path [274, 67]
+	latency: 211.490747
+	failure rate: 0.798889
+route path [216, 580]
+	latency: 350.272724
+	failure rate: 0.900000
+route path [897, 735]
+	latency: 213.521666
+	failure rate: 0.738889
+route path [322, 217]
+	latency: 221.349689
+	failure rate: 0.846667
+route path [671, 511]
+	latency: 194.654928
+	failure rate: 0.714444
+route path [405, 658]
+	latency: 307.275813
+	failure rate: 0.834444
+route path [469, 146]
+	latency: 375.969782
+	failure rate: 0.931111
+route path [271, 142]
+	latency: 185.587884
+	failure rate: 0.687778
+route path [252, 762]
+	latency: 357.381041
+	failure rate: 0.921111
+route path [574, 551]
+	latency: 80.649509
+	failure rate: 0.558889
+route path [269, 764]
+	latency: 450.723616
+	failure rate: 0.923333
+route path [598, 438]
+	latency: 195.967012
+	failure rate: 0.702222
+route path [597, 408]
+	latency: 212.147454
+	failure rate: 0.720000
+route path [370, 224]
+	latency: 168.435259
+	failure rate: 0.807778
+route path [141, 521]
+	latency: 463.825565
+	failure rate: 0.968889
+route path [505, 93]
+	latency: 445.716750
+	failure rate: 0.967778
+route path [773, 48]
+	latency: 195.064402
+	failure rate: 0.790000
+route path [881, 112]
+	latency: 159.766956
+	failure rate: 0.688889
+route path [156, 642]
+	latency: 445.357931
+	failure rate: 0.956667
+route path [163, 811]
+	latency: 274.042370
+	failure rate: 0.797778
+route path [696, 432]
+	latency: 305.268656
+	failure rate: 0.892222
+route path [610, 65]
+	latency: 376.023796
+	failure rate: 0.927778
+route path [394, 390]
+	latency: 28.085669
+	failure rate: 0.307778
+route path [610, 479]
+	latency: 198.096896
+	failure rate: 0.703333
+route path [541, 257]
+	latency: 378.807776
+	failure rate: 0.878889
+route path [566, 881]
+	latency: 438.889192
+	failure rate: 0.948889
+route path [11, 696]
+	latency: 180.905978
+	failure rate: 0.702222
+route path [738, 117]
+	latency: 270.944600
+	failure rate: 0.814444
+route path [698, 549]
+	latency: 128.242164
+	failure rate: 0.642222
+route path [768, 273]
+	latency: 473.439615
+	failure rate: 0.976667
+route path [787, 656]
+	latency: 198.253803
+	failure rate: 0.720000
+route path [348, 114]
+	latency: 273.459471
+	failure rate: 0.852222
+route path [300, 445]
+	latency: 144.497937
+	failure rate: 0.697778
+route path [161, 464]
+	latency: 278.667557
+	failure rate: 0.813333
+route path [3, 739]
+	latency: 245.489656
+	failure rate: 0.786667
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778
+route path [896, 739]
+	latency: 166.878267
+	failure rate: 0.667778

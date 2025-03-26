@@ -69,8 +69,10 @@ with open ( IN_PATH, "r" , encoding="utf-8") as f:
     while count < num_observers:
         while True:
             u = random.randint(0, N - 1)
-            direct = random.randint(0, 3) # 0, 1, 2, 3  对应 move 函数的 1+direct 是 1, 2, 3, 4
-            v = move(u, 1 + direct, Q, P, F) # 使用 move 函数计算 v
+            v = random.randint(0, N - 1)
+            # direct = random.randint(0, 3) # 0, 1, 2, 3  对应 move 函数的 1+direct 是 1, 2, 3, 4
+            # v = move(u, 1 + direct, Q, P, F) # 使用 move 函数计算 v
+            
             if u != v:
                 break
         observer_pair = (u, v)

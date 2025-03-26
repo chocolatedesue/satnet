@@ -27,6 +27,7 @@
     "sat_lla_dir": "data/326gen/sat-subpoint-position",
     "sat_velocity_dir": "data/326gen/sat-move-direction",
     "report_dir": "output",
+    "observer_config_path": "data/326gen/observers.txt",
 
     "visualization": {
         "source": 103,

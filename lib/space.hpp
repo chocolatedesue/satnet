@@ -232,6 +232,16 @@ private:
         }
     }
 
+    void loadObserverConfig(std::string observer_config_path) {
+        auto ifs = std::ifstream(observer_config_path);
+        ifs >> num_observers;
+        for(int i = 0; i < num_observers; i++) {
+            int src, dst;
+            ifs >> src >> dst;
+            latency_observers.push_back(std::make_pair(src, dst));
+        }
+    }
+
     void introduce_random_error() {
         // std::uniform_real_distribution<int> distribution(0, );
         if (N < 8) {
@@ -374,40 +384,13 @@ public:
             seed = config["seed"];
         }
         random_engine = std::mt19937(seed);
-        if(config.count("num_latency_observers")) {
-            num_observers = config["num_latency_observers"];
-            if(num_observers == -1) {
-                for(int i = 0; i < N; i++) {
-                    for(int j = 0; j < N; j++) {
-                        if(i != j) {
-                            latency_observers.push_back(std::make_pair(i, j));
-                        }
-                    }
-                }
-                num_observers = latency_observers.size();
-            } else {
-                std::set<std::pair<int, int> > observer_set;
-                for(int i = 0; i < num_observers; i++) {
-                    int u, v;
-                    do {
-                        // u = rand() % N;
-                        // v = rand() % N;
-                        u = std::uniform_int_distribution<int>(0, N - 1)(random_engine);
-                        // v = random_engine() % N;
-                        int direct = std::uniform_int_distribution<int>(0, 3)(random_engine);
-                        v = move(u, 1 + direct );
-                    } while(u == v);
-                    if (observer_set.count(std::make_pair(u, v))) {
-                        i--;
-                    } else {
-                        observer_set.insert(std::make_pair(u, v));
-                    }
-                    latency_observers.push_back(std::make_pair(u, v));
-                }
-            }
-        } else {
-            num_observers = 0;
+        
+        if (!config.count("observer_config_path")) {
+            std::cout << "No observer config path found" << std::endl;
+            exit(1);
         }
+
+        loadObserverConfig(config["observer_config_path"]);
 
         dump_rib = std::vector<int>(N, 0);
         if(config.count("dump_rib_nodes")) {
