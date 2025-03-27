@@ -1,0 +1,28 @@
+{
+    "name": "GW-2-1 (24 hour) - Oct",
+    "constellation": {
+        "num_of_orbit_planes": 48,
+        "num_of_satellites_per_plane": 36,
+        "relative_spacing": 2,
+        "inclination": 30,
+        "altitude": 1145
+    },
+    "ISL_latency": {
+        "processing_delay": 0,
+        "propagation_delay_coef": 1.0,
+        "propagation_speed": 299792458
+    },
+    "duration": 86400,
+    "step_length": 10,
+    "update_period": 60,
+    "refresh_period": 600,    
+
+    "num_latency_observers": 100000,
+    "random_seed": 17,
+
+    "isl_state_dir": "/home/chenyuxuan/leo-celestial-model/testcase-config/GW-2-1-Oct/isl-sun-outage",
+    "sat_position_dir": "/home/chenyuxuan/leo-celestial-model/testcase-config/GW-2-1-Oct/sat-geocentric-position",
+    "sat_lla_dir": "/home/chenyuxuan/leo-celestial-model/testcase-config/GW-2-1-Oct/sat-subpoint-position",
+    "sat_velocity_dir": "/home/chenyuxuan/leo-celestial-model/testcase-config/GW-2-1-Oct/sat-move-direction",
+    "report_dir": "output"
+}

@@ -1,0 +1,37 @@
+{
+    "name": "GW-A59-3 Visual Path",
+    "constellation": {
+        "num_of_orbit_planes": 60,
+        "num_of_satellites_per_plane": 60,
+        "relative_spacing": 0,
+        "inclination": 53,
+        "altitude": 550
+    },
+    
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.00,
+        "propagation_speed": 299792458
+    },
+
+    "start_time": 0,
+    "duration": 60,
+    "step_length": 10,
+    "update_period": 60,    
+
+    "random_seed": 17,
+
+    "isl_state_dir": "/home/phye/leo-celestial-model/testcase-config/test3/isl-sun-outage",
+    "sat_position_dir": "/home/phye/leo-celestial-model/testcase-config/test3/sat-geocentric-position",
+    "sat_lla_dir": "/home/phye/leo-celestial-model/testcase-config/test3/sat-subpoint-position",
+    "sat_velocity_dir": "/home/phye/leo-celestial-model/testcase-config/test3/sat-move-direction",
+    "report_dir": "output",
+
+    
+    "visualization": {
+        "source": 16,
+        "destination": 1889,
+        "frames_dir": "visualization/frame_data",
+        "scenario": "Visual Path - 4"
+    }
+}

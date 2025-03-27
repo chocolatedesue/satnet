@@ -1,0 +1,30 @@
+{
+    "name": "GW-A59-3 (24 hours) - Slicing - Autumn",
+    "constellation": {
+        "num_of_orbit_planes": 60,
+        "num_of_satellites_per_plane": 60,
+        "relative_spacing": 1,
+        "inclination": 53,
+        "altitude": 550
+    },
+    
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.00,
+        "propagation_speed": 299792458
+    },
+
+    "duration": 86400,
+    "step_length": 10,
+    "update_period": 10,
+    "refresh_period": 600,    
+
+    "num_latency_observers": 100000,
+    "random_seed": 17,
+
+    "isl_state_dir": "data/xw-autumn-test/isl-sun-outage",
+    "sat_position_dir": "data/xw-autumn-test/sat-geocentric-position",
+    "sat_lla_dir": "data/xw-autumn-test/sat-subpoint-position",
+    "sat_velocity_dir": "data/xw-autumn-test/sat-move-direction",
+    "report_dir": "output"
+}

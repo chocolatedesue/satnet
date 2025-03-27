@@ -1,0 +1,32 @@
+{
+    "name": "GW-A59-3 Visualization",
+    "constellation": {
+        "num_of_orbit_planes": 30,
+        "num_of_satellites_per_plane": 30,
+        "relative_spacing": 1,
+        "inclination": 53,
+        "altitude": 550
+    },
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.0,
+        "propagation_speed": 299792458
+    },
+    "start_time": 0,
+    "num_latency_observers": 100,
+    "random_seed" : 0,
+    "duration": 9000,
+    "step_length": 10,
+    "update_period": 60,
+    "isl_state_dir": "data/testcase-config/example/isl-sun-outage",
+    "sat_position_dir": "data/testcase-config/example/sat-geocentric-position",
+    "sat_lla_dir": "data/testcase-config/example/sat-subpoint-position",
+    "sat_velocity_dir": "data/testcase-config/example/sat-move-direction",
+    "report_dir": "output",
+    "visualization": {
+        "source": 103,
+        "destination": 879,
+        "frames_dir": "visualization/frame_data",
+        "scenario": "base - Route Table"
+    }
+}

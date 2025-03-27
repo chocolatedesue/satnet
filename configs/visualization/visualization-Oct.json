@@ -1,0 +1,30 @@
+{
+    "name": "GW-A59-3 Visualization",
+    "constellation": {
+        "num_of_orbit_planes": 60,
+        "num_of_satellites_per_plane": 60,
+        "relative_spacing": 1,
+        "inclination": 53,
+        "altitude": 550
+    },
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.0,
+        "propagation_speed": 299792458
+    },
+    "duration": 5400,
+    "step_length": 60,
+    "isl_state_dir": "data/seasons/Oct1st/isl-sun-outage",
+    "sat_position_dir": "data/seasons/Oct1st/sat-geocentric-position",
+    "sat_lla_dir": "data/seasons/Oct1st/sat-subpoint-position",
+    "sat_velocity_dir": "data/seasons/Oct1st/sat-move-direction",
+    "dawn_dusk_dir": "data/20230930qb_ddl/Oct1st/ddl-lat-lon",
+    "dawn_dusk_icrs_dir": "data/20230930qb_ddl/Oct1st/ddl-geocentric",
+    "report_dir": "output",
+    "visualization": {
+        "source": -1,
+        "destination": -1,
+        "frames_dir": "visualization/frame_data",
+        "scenario": "Oct 1st (90 min) - "
+    }
+}
