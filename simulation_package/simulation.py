@@ -129,7 +129,7 @@ class Simulation:
         logger.info(f"--- Starting Simulation: {self.config.name} ---")
         logger.info(f"Time Range: {self.current_time} to {self.end_time - self.step} (Step: {self.step})")
         logger.info(f"Update Period: {self.config.update_period}, Refresh Period: {self.config.refresh_period}")
-
+        logger.info(f"Random Seed: {self.config.seed}")
         self._run_start_wall_time = time.time()
 
         try: # Wrap the main loop in try/except for runtime errors
@@ -148,8 +148,8 @@ class Simulation:
                     logger.debug("Loading future banned states...")
                     self.data_manager.load_future_banned(self.current_time)
 
-                    logger.debug("Applying random failures...")
-                    self.failure_manager.apply_random_failures(self.data_manager.get_current_banned())
+                    # logger.debug("Applying random failures...")
+                    # self.failure_manager.apply_random_failures(self.data_manager.get_current_banned())
 
                     logger.debug("Computing and updating routes...")
                     compute_time_ms, update_count = self.routing_manager.compute_and_update_routes(self.current_time)
@@ -183,11 +183,11 @@ class Simulation:
                 # 5. Visualization Output?
                 # Use debug as visualization might happen every step and be verbose
                 logger.debug("Checking for visualization output...")
-                self.visualizer.generate_and_save_frame(
-                    self.current_time,
-                    self.data_manager,
-                    self.routing_manager.get_routing_tables()
-                )
+                # self.visualizer.generate_and_save_frame(
+                #     self.current_time,
+                #     self.data_manager,
+                #     self.routing_manager.get_routing_tables()
+                # )
 
                 # 6. Advance Simulation Time
                 self.current_time += self.step
@@ -223,3 +223,36 @@ class Simulation:
             final_elapsed_wall
         )
         logger.info(f"Total Wall Time: {final_elapsed_wall:.2f} s")
+
+
+
+    
+    def calc_delay_by_node(self):
+        """
+        Calculate the delay for each node in the simulation.
+
+        Returns:
+            A dictionary with node IDs as keys and their respective delays as values.
+        """
+        logger.debug("Calculating delay by node...")
+
+        self.current_time = 100
+        
+        self.data_manager.load_state_for_time(self.current_time)
+        
+        logger.debug("Computing and updating routes...")
+        compute_time_ms, update_count = self.routing_manager.compute_and_update_routes(self.current_time)
+        
+        logger.info(f"Route computation/update took {compute_time_ms:.2f} ms for {update_count} nodes.")
+
+        # Log computation statistics
+        self.stats_collector.log_compute_update_metrics(compute_time_ms * self.config.N, # Total time
+                                                        update_count * self.config.N,    # Total updates
+                                                                   self.current_time)       
+
+        
+
+        self.stats_collector.compute_observer_metrics(
+            self.routing_manager.get_routing_tables(),
+            self.data_manager # Pass DataManager to access state inside stats
+        )

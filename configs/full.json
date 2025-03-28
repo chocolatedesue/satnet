@@ -14,7 +14,7 @@
         "propagation_speed": 299792458
     },
 
-    "duration": 9000,
+    "duration": 900,
     "step_length": 10,
     "update_period": 60,
     "refresh_period": 600,    

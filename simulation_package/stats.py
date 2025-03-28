@@ -1,3 +1,4 @@
+from loguru import logger
 import numpy as np
 from pathlib import Path
 import sys
@@ -102,6 +103,8 @@ class StatisticsCollector:
         max_hops = self.N * 2 # Safety break
         hops = 0
 
+        paths = []
+
         while cur != dst and hops < max_hops:
             # visited_in_this_path.add(cur) # For set-based detection
 
@@ -132,6 +135,8 @@ class StatisticsCollector:
                 self.config.proc_delay, self.config.prop_delay_coef, self.config.prop_speed
             )
             latency += one_hop_latency
+            paths.append((cur, next_hop_port, neigh, one_hop_latency))
+            logger.debug(f"Path step: {src} -> {dst}, cur={cur}, next_hop_port={next_hop_port}, neigh={neigh}, latency={latency:.3f} ms")
             cur = neigh
             hops += 1
 
@@ -146,6 +151,26 @@ class StatisticsCollector:
 
 
         return latency, success
+    
+
+    def compute_observer_by_node_id(self, node_id: int, route_tables: np.ndarray, data_manager: DataManager) -> None:
+        """Computes latency and failure rate for a specific observer node."""
+        if self.num_observers == 0: 
+            logger.warning("No observers configured.")
+            return
+        if node_id < 0 or node_id >= self.num_observers:
+            logger.error(f"Invalid observer node ID: {node_id}. Must be between 0 and {self.num_observers - 1}.")
+            return
+        src, dst = self.latency_observers[node_id]
+        latency, success = self._compute_latency(src, dst, route_tables, data_manager.get_current_banned(), data_manager.get_positions())
+        if success:
+            self.failure_rates[node_id].add(0.0)
+            logger.info(f"Observer {node_id} [{src}->{dst}]: Latency={latency:.3f} ms")
+        else:
+            self.failure_rates[node_id].add(1.0)
+            logger.info(f"Observer {node_id} [{src}->{dst}]: Failed to compute latency")
+        self.latency_results[node_id].add(latency)
+        
 
 
     def compute_observer_metrics(self, route_tables: np.ndarray, data_manager: DataManager):
@@ -161,12 +186,15 @@ class StatisticsCollector:
 
             if success:
                 self.failure_rates[i].add(0.0)
-                self.latency_results[i].add(latency)
+                
                 # print(f"Observer {i} [{src}->{dst}]: Success, Latency={latency:.3f} ms")
+                logger.info(f"Observer {i} [{src}->{dst}]: Latency={latency:.3f} ms")
             else:
                 self.failure_rates[i].add(1.0)
-                self.latency_results[i].add(-1.0) # Signal failure to Average class
+                # self.latency_results[i].add(-1.0) # Signal failure to Average class
                 # print(f"Observer {i} [{src}->{dst}]: Failed")
+                logger.info(f"Observer {i} [{src}->{dst}]: Failed to compute latency")
+            self.latency_results[i].add(latency)
 
     def get_results(self) -> Dict[str, Any]:
         """Returns a dictionary containing the current average results."""

@@ -11,7 +11,7 @@ class Average:
 
     def add(self, val: float):
         if val == -1:
-            val_to_add = 1.5 * self._mx if self._mx > 0 else 0 # Avoid adding 0 if no max seen
+            val_to_add = 2 * self._mx if self._mx > 0 else 0 # Avoid adding 0 if no max seen
         else:
             val_to_add = val
             self._mx = max(self._mx, val)
