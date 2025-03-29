@@ -84,6 +84,7 @@ private:
     std::vector<std::array<double, 3> > sat_lla;
     std::vector<double> sat_vel;
 
+
     char report_filename[100];
 
     double run_start;
@@ -250,6 +251,16 @@ private:
         fclose(fout);
     }
 
+    void loadObserverConfig(std::string observer_config_path) {
+        auto ifs = std::ifstream(observer_config_path);
+        ifs >> num_observers;
+        for(int i = 0; i < num_observers; i++) {
+            int src, dst;
+            ifs >> src >> dst;
+            latency_observers.push_back(std::make_pair(src, dst));
+        }
+    }
+
 public:
     SpaceSimulation(std::string config_file_name) {
         auto config = json::parse(std::ifstream(config_file_name));
@@ -310,32 +321,44 @@ public:
             output_frames = false;
         }
 
-        if(config.count("num_latency_observers")) {
-            num_observers = config["num_latency_observers"];
-            if(num_observers == -1) {
-                for(int i = 0; i < N; i++) {
-                    for(int j = 0; j < N; j++) {
-                        if(i != j) {
-                            latency_observers.push_back(std::make_pair(i, j));
-                        }
-                    }
-                }
-                num_observers = latency_observers.size();
-            } else {
-                seed = config["random_seed"];
-                srand(seed);
-                for(int i = 0; i < num_observers; i++) {
-                    int u, v;
-                    do {
-                        u = rand() % N;
-                        v = rand() % N;
-                    } while(u == v);
-                    latency_observers.push_back(std::make_pair(u, v));
-                }
-            }
-        } else {
-            num_observers = 0;
+        // if(config.count("num_latency_observers")) {
+        //     num_observers = config["num_latency_observers"];
+        //     if(num_observers == -1) {
+        //         for(int i = 0; i < N; i++) {
+        //             for(int j = 0; j < N; j++) {
+        //                 if(i != j) {
+        //                     latency_observers.push_back(std::make_pair(i, j));
+        //                 }
+        //             }
+        //         }
+        //         num_observers = latency_observers.size();
+        //     } else {
+        //         seed = config["random_seed"];
+        //         srand(seed);
+        //         for(int i = 0; i < num_observers; i++) {
+        //             int u, v;
+        //             do {
+        //                 u = rand() % N;
+        //                 v = rand() % N;
+        //             } while(u == v);
+        //             latency_observers.push_back(std::make_pair(u, v));
+        //         }
+        //     }
+        // } else {
+        //     num_observers = 0;
+        // }
+
+        if (!config.count("observer_config_path")) {
+            std::cout << "No observer_config_path found in config json" << std::endl;
+            exit(1);
         }
+
+        seed = 42;
+        srand(seed);
+
+        loadObserverConfig(config["observer_config_path"]);
+
+        
 
         dump_rib = std::vector<int>(N, 0);
         if(config.count("dump_rib_nodes")) {

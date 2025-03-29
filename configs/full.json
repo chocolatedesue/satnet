@@ -1,11 +1,11 @@
 {
-    "name": "GW-A59-3 (24 hours)",
+    "name": "full example - dijkstraBase",
     "constellation": {
-        "num_of_orbit_planes": 60,
-        "num_of_satellites_per_plane": 60,
+        "num_of_orbit_planes": 30,
+        "num_of_satellites_per_plane": 30,
         "relative_spacing": 1,
-        "inclination": 53,
-        "altitude": 550
+        "inclination": 50,
+        "altitude": 600
     },
     
     "ISL_latency": {
@@ -14,17 +14,25 @@
         "propagation_speed": 299792458
     },
 
-    "duration": 86400,
+    "duration": 900,
     "step_length": 10,
     "update_period": 60,
     "refresh_period": 600,    
 
-    "num_latency_observers": 100000,
+    "num_latency_observers": 100,
     "random_seed": 17,
 
-    "isl_state_dir": "data/xw-sat-data/isl-sun-outage",
-    "sat_position_dir": "data/xw-sat-data/sat-geocentric-position",
-    "sat_lla_dir": "data/xw-sat-data/sat-subpoint-position",
-    "sat_velocity_dir": "data/xw-sat-data/sat-move-direction",
-    "report_dir": "output"
+    "isl_state_dir": "data/example/isl-sun-outage",
+    "sat_position_dir": "data/example/sat-geocentric-position",
+    "sat_lla_dir": "data/example/sat-subpoint-position",
+    "sat_velocity_dir": "data/example/sat-move-direction",
+    "report_dir": "output",
+    "observer_config_path": "data/example/observers.txt",
+
+    "visualization": {
+        "source": 103,
+        "destination": 879,
+        "frames_dir": "visualization/frame_data",
+        "scenario": "full example - Route Table"
+    }
 }
