@@ -252,6 +252,12 @@ private:
     }
 
     void loadObserverConfig(std::string observer_config_path) {
+        // check if the file exists
+        struct stat buffer;
+        if (stat(observer_config_path.c_str(), &buffer) != 0) {
+            std::cerr << "Observer config file not found: " << observer_config_path << std::endl;
+            exit(1);
+        }
         auto ifs = std::ifstream(observer_config_path);
         ifs >> num_observers;
         for(int i = 0; i < num_observers; i++) {

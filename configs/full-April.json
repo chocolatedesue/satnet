@@ -1,5 +1,5 @@
 {
-    "name": "full example - dijkstraBase",
+    "name": "full April - sample",
     "constellation": {
         "num_of_orbit_planes": 30,
         "num_of_satellites_per_plane": 30,
@@ -22,17 +22,17 @@
     "num_latency_observers": 100,
     "random_seed": 17,
 
-    "isl_state_dir": "data/example/isl-sun-outage",
-    "sat_position_dir": "data/example/sat-geocentric-position",
-    "sat_lla_dir": "data/example/sat-subpoint-position",
-    "sat_velocity_dir": "data/example/sat-move-direction",
+    "isl_state_dir": "data/april-sample/isl-sun-outage",
+    "sat_position_dir": "data/april-sample/sat-geocentric-position",
+    "sat_lla_dir": "data/april-sample/sat-subpoint-position",
+    "sat_velocity_dir": "data/april-sample/sat-move-direction",
     "report_dir": "output",
-    "observer_config_path": "data/example/observers.txt",
+    "observer_config_path": "data/april-sample/observers.txt",
 
     "visualization": {
         "source": 103,
         "destination": 879,
         "frames_dir": "visualization/frame_data",
-        "scenario": "full example - Route Table"
+        "scenario": "april-sample - Route Table"
     }
 }
