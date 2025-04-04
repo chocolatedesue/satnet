@@ -9,6 +9,7 @@
 #include "utils.h"
 
 #include "json.hpp"
+#include "omp.h"
 using json = nlohmann::json;
 
 #include "base.hpp"
@@ -421,15 +422,21 @@ public:
 
             if(cur_time % update_period == 0) {
                 load_futr_banned();
+                
+                // Define local storage for thread-specific results
+                std::vector<double> local_compute_times(N);
+                std::vector<int> local_diff_counts(N);
+                
+                #pragma omp parallel for
                 for(int i = 0; i < N; i++) {
                     auto &node = nodes[i];
                     auto &cur_table = route_tables[i];
-
+            
                     auto compute_start = clock();
                     node.compute();
-                    auto elpased_s = (clock() -  compute_start) * 1.0 / CLOCKS_PER_SEC;
-                    auto elpased_ms = elpased_s * 1000;
-                    compute_time_result.add(elpased_ms);
+                    auto elapsed_s = (clock() - compute_start) * 1.0 / CLOCKS_PER_SEC;
+                    auto elapsed_ms = elapsed_s * 1000;
+                    local_compute_times[i] = elapsed_ms;
                     
                     auto &new_table = node.getRouteTable();
                     int diff = 0;
@@ -439,12 +446,21 @@ public:
                             diff++;
                         }
                     }
-                    if(cur_time != 0) {
-                        update_entry_result.add(diff);
+                    local_diff_counts[i] = diff;
+            
+                    #pragma omp critical
+                    {
+                        if(dump_rib[i]) {
+                            save_rib(cur_table, i);
+                        }
                     }
-
-                    if(dump_rib[i]) {
-                        save_rib(cur_table, i);
+                }
+                
+                // Aggregate results after parallel section
+                for(int i = 0; i < N; i++) {
+                    compute_time_result.add(local_compute_times[i]);
+                    if(cur_time != 0) {
+                        update_entry_result.add(local_diff_counts[i]);
                     }
                 }
             }
