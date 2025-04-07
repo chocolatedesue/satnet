@@ -24,12 +24,12 @@ using json = nlohmann::json;
 
 class Average {
 private:
-    double sum;
+    double sum,mx;
     int cnt;
-
 public:
     Average() {
         sum = 0.0, cnt = 0;
+        mx = 0;
     }
     void add(double val) {
         sum += val, cnt++;
@@ -211,6 +211,22 @@ private:
     void load_cur_banned() {
         clearIslState(cur_banned);
         readIslStateFlie(cur_time, cur_banned);
+    }
+
+    void load_random_error_by_edges() {
+        for (int i = 0; i < N; i++) {
+            for(int j = 1; j <= 4; j++) {
+                int v = move(i, j);
+                if(cur_banned[i][j] == 0) {
+                    double rand_num = static_cast<double>(rand()) / RAND_MAX;
+                    if(rand_num < 0.1) {
+                        cur_banned[i][j] = 1;
+                        cur_banned[v][j] = 1;
+                    }
+                }
+            }
+        }
+
     }
 
     void load_futr_banned() {
@@ -422,21 +438,20 @@ public:
 
             if(cur_time % update_period == 0) {
                 load_futr_banned();
-                
-                // Define local storage for thread-specific results
-                std::vector<double> local_compute_times(N);
-                std::vector<int> local_diff_counts(N);
-                
-                #pragma omp parallel for
+                // 替换注释掉的聚合代码
+                double total_compute_time = 0.0;
+                int total_diff_count = 0;
+
+                #pragma omp parallel for reduction(+:total_compute_time,total_diff_count)
                 for(int i = 0; i < N; i++) {
                     auto &node = nodes[i];
                     auto &cur_table = route_tables[i];
-            
+
                     auto compute_start = clock();
                     node.compute();
                     auto elapsed_s = (clock() - compute_start) * 1.0 / CLOCKS_PER_SEC;
                     auto elapsed_ms = elapsed_s * 1000;
-                    local_compute_times[i] = elapsed_ms;
+                    total_compute_time += elapsed_ms;
                     
                     auto &new_table = node.getRouteTable();
                     int diff = 0;
@@ -446,8 +461,10 @@ public:
                             diff++;
                         }
                     }
-                    local_diff_counts[i] = diff;
-            
+                    if(cur_time != 0) {
+                        total_diff_count += diff;
+                    }
+
                     #pragma omp critical
                     {
                         if(dump_rib[i]) {
@@ -455,13 +472,11 @@ public:
                         }
                     }
                 }
-                
-                // Aggregate results after parallel section
-                for(int i = 0; i < N; i++) {
-                    compute_time_result.add(local_compute_times[i]);
-                    if(cur_time != 0) {
-                        update_entry_result.add(local_diff_counts[i]);
-                    }
+
+                // 单次添加汇总数据，避免循环
+                compute_time_result.add(total_compute_time / N);
+                if(cur_time != 0) {
+                    update_entry_result.add(static_cast<double>(total_diff_count) / (cur_time == 0 ? 1 : N));
                 }
             }
 
@@ -488,12 +503,14 @@ public:
                 auto src = latency_observers[i].first;
                 auto dst = latency_observers[i].second;
                 auto [latency, success] = computeLatency(src, dst);
-                if(success) {
-                    latency_results[i].add(latency);
+                if(success) {           
                     failure_rates[i].add(0);
                 } else {
                     failure_rates[i].add(1);
+                    latency = -1;
                 }
+                if (latency != -1)
+                    latency_results[i].add(latency);
             }
         }
         report();

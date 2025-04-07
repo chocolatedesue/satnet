@@ -1,2 +1,2 @@
 main: main.cpp lib/*
-	g++  -fopenmp -g main.cpp -o main -std=c++17
+	clang++ -fopenmp  main.cpp -o main -std=c++17 -O2
