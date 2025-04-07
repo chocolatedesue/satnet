@@ -1,7 +1,24 @@
 #ifndef SATSIM_SPACE_HPP_
 #define SATSIM_SPACE_HPP_
 
-#include <bits/stdc++.h>
+#include<vector>
+#include<set>
+#include<map>
+#include<queue>
+#include<ctime>
+#include<cstdio>
+#include<algorithm>
+#include<cfloat>
+#include<iostream>
+#include<fstream>
+#include<cstring>
+#include <climits>
+#include<cmath>
+#include <sys/stat.h>
+#include <sys/types.h>
+// #include <random>
+#include "dirent.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "dirent.h"
@@ -476,7 +493,7 @@ public:
                 // 单次添加汇总数据，避免循环
                 compute_time_result.add(total_compute_time / N);
                 if(cur_time != 0) {
-                    update_entry_result.add(static_cast<double>(total_diff_count) / (cur_time == 0 ? 1 : N));
+                    update_entry_result.add(static_cast<double>(total_diff_count) / N);
                 }
             }
 
