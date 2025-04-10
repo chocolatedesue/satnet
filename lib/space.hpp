@@ -127,7 +127,7 @@ private:
         } else if(dir == 2) {
             if(x == P - 1) {
                 x = 0;
-                y = (y + F) % Q;
+                // y = (y + F) % Q;
             } else {
                 x = x + 1;
             }
@@ -136,7 +136,7 @@ private:
         } else if(dir == 4) {
             if(x == 0) {
                 x = P - 1;
-                y = (y - F + Q) % Q;
+                // y = (y - F + Q) % Q;
             } else {
                 x = x - 1;
             }
