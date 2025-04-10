@@ -1,0 +1,38 @@
+{
+    "name": "full-gw-3600 - Jan",
+    "constellation": {
+        "num_of_orbit_planes": 60,
+        "num_of_satellites_per_plane": 60,
+        "relative_spacing": 1,
+        "inclination": 50,
+        "altitude": 600
+    },
+    
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.00,
+        "propagation_speed": 299792458
+    },
+
+    "duration": 6600,
+    "step_length": 10,
+    "update_period": 60,
+    "refresh_period": 600,    
+
+    "num_latency_observers": 100,
+    "random_seed": 17,
+
+    "isl_state_dir": "data/full-gw-2000/isl-sun-outage",
+    "sat_position_dir": "data/full-gw-2000/sat-geocentric-position",
+    "sat_lla_dir": "data/full-gw-2000/sat-subpoint-position",
+    "sat_velocity_dir": "data/full-gw-2000/sat-move-direction",
+    "report_dir": "output",
+    "observer_config_path": "data/full-gw-2000/observers.txt",
+
+    "visualization": {
+        "source": 103,
+        "destination": 879,
+        "frames_dir": "visualization/frame_data",
+        "scenario": "full full-gw-2000 - Route Table"
+    }
+}
