@@ -2,6 +2,7 @@
 #define UTILS_H_
 
 #include <array>
+#include <string>
 #include <vector>
 #include <utility> // 需要包含 <utility> 来声明 std::pair
 
@@ -15,9 +16,11 @@ namespace GlobalConfig {
     extern int proc_delay;      // ms
     extern int prop_delay_coef; // km/ms (原始警告变量)
     extern double prop_speed;   // km/ms
+    extern int num_observers;
     extern std::vector<std::array<double, 3>> sat_pos;
     extern std::vector<std::array<double, 3>> sat_lla;
     extern std::vector<std::pair<int, int>> latency_observers;
+    extern void loadObserverConfig(std::string observer_config_path);
 
 } // namespace GlobalConfig
 

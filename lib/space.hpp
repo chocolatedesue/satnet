@@ -24,7 +24,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-
 #include "utils.hpp"
 
 #include "json.hpp"
@@ -76,7 +75,7 @@ private:
   int update_period;
   int refresh_period;
 
-  int num_observers;
+
   unsigned seed;
 
   std::vector<T> nodes;
@@ -261,8 +260,8 @@ private:
     fprintf(fout, "estimated time of arrival: %f\n", eta);
     fprintf(fout, "compute time: %f\n", compute_time_result.getResult());
     fprintf(fout, "update entry: %f\n", update_entry_result.getResult());
-    fprintf(fout, "number of observers: %d\n", num_observers);
-    for (int i = 0; i < num_observers; i++) {
+    fprintf(fout, "number of observers: %d\n", GlobalConfig::num_observers);
+    for (int i = 0; i < GlobalConfig::num_observers; i++) {
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
       auto latency = latency_results[i].getResult();
@@ -273,22 +272,6 @@ private:
     fclose(fout);
   }
 
-  void loadObserverConfig(std::string observer_config_path) {
-    // check if the file exists
-    struct stat buffer;
-    if (stat(observer_config_path.c_str(), &buffer) != 0) {
-      std::cerr << "Observer config file not found: " << observer_config_path
-                << std::endl;
-      exit(1);
-    }
-    auto ifs = std::ifstream(observer_config_path);
-    ifs >> num_observers;
-    for (int i = 0; i < num_observers; i++) {
-      int src, dst;
-      ifs >> src >> dst;
-      GlobalConfig::latency_observers.push_back(std::make_pair(src, dst));
-    }
-  }
 
 public:
   SpaceSimulation(std::string config_file_name) {
@@ -303,10 +286,25 @@ public:
     N = P * Q;
 
     // cfg1.P = P, cfg1.Q = Q, cfg1.F = F, cfg1.N = N;
-    using namespace GlobalConfig;
-    proc_delay = config["ISL_latency"]["processing_delay"];
-    prop_delay_coef = config["ISL_latency"]["propagation_delay_coef"];
-    prop_speed = config["ISL_latency"]["propagation_speed"];
+    {
+      // using namespace GlobalConfig;
+      GlobalConfig::proc_delay = config["ISL_latency"]["processing_delay"];
+      GlobalConfig::prop_delay_coef = config["ISL_latency"]["propagation_delay_coef"];
+      GlobalConfig::prop_speed = config["ISL_latency"]["propagation_speed"];
+
+      GlobalConfig::sat_pos = std::vector<std::array<double, 3>>(N);
+      GlobalConfig::sat_lla = std::vector<std::array<double, 3>>(N);
+      GlobalConfig::P = config["constellation"]["num_of_orbit_planes"];
+      GlobalConfig::Q = config["constellation"]["num_of_satellites_per_plane"];
+      GlobalConfig::F = config["constellation"]["relative_spacing"];
+      GlobalConfig::N = GlobalConfig::P * GlobalConfig::Q;
+
+      
+      
+      GlobalConfig::num_observers = config["num_observers"];
+      GlobalConfig::loadObserverConfig(config["observer_config_path"]);
+    }
+
     sat_pos_dir = config["sat_position_dir"];
     sat_lla_dir = config["sat_lla_dir"];
 
@@ -370,7 +368,8 @@ public:
     seed = 42;
     srand(seed);
 
-    loadObserverConfig(config["observer_config_path"]);
+    // loadObserverConfig(config["observer_config_path"]);
+
 
     dump_rib = std::vector<int>(N, 0);
     if (config.count("dump_rib_nodes")) {
@@ -380,7 +379,7 @@ public:
       }
     }
 
-    World world(&cur_banned, &futr_banned, &sat_pos, &sat_lla, &sat_vel);
+    World world(&cur_banned, &futr_banned, &GlobalConfig::sat_pos, &GlobalConfig::sat_lla, &sat_vel);
     for (int i = 0; i < N; i++) {
       nodes.push_back(T(config, i, world));
     }
@@ -388,16 +387,15 @@ public:
 
     cur_banned = std::vector<std::array<int, 5>>(N);
     futr_banned = std::vector<std::array<int, 5>>(N);
-    sat_pos = std::vector<std::array<double, 3>>(N);
-    sat_lla = std::vector<std::array<double, 3>>(N);
+
     sat_vel = std::vector<double>(N);
     route_tables = std::vector<std::vector<int>>(N, std::vector<int>(N));
 
     path_timer = 0;
     path_vis = std::vector<int>(N);
 
-    latency_results = std::vector<Average>(num_observers);
-    failure_rates = std::vector<Average>(num_observers);
+    latency_results = std::vector<Average>(GlobalConfig::num_observers);
+    failure_rates = std::vector<Average>(GlobalConfig::num_observers);
 
     auto now = std::chrono::system_clock::now();
     time_t utc_tm = std::chrono::system_clock::to_time_t(now);
@@ -485,7 +483,7 @@ public:
         save_frame();
       }
 
-      for (int i = 0; i < num_observers; i++) {
+      for (int i = 0; i < GlobalConfig::num_observers; i++) {
         auto src = GlobalConfig::latency_observers[i].first;
         auto dst = GlobalConfig::latency_observers[i].second;
         auto [latency, success] = computeLatency(src, dst);

@@ -1,5 +1,5 @@
 # --- Compiler and Flags ---
-CXX = clang++
+CXX = g++
 # C++ Standard
 CPP_STD = -std=c++17
 # Warning Flags (Recommended)
@@ -11,9 +11,9 @@ STDLIB_FLAGS = -stdlib=libc++
 # OpenMP Flag (if needed, keep it)
 OMP_FLAGS = -fopenmp
 # Linker Flags (can often be similar to compiler flags)
-LDFLAGS = $(STDLIB_FLAGS) $(OMP_FLAGS)
+LDFLAGS = $(OMP_FLAGS) #  $(STDLIB_FLAGS)
 # Aggregate CXX Flags
-CXXFLAGS = $(STDLIB_FLAGS) $(OMP_FLAGS) $(CPP_STD) $(OPT_FLAGS) # $(WARNING_FLAGS)
+CXXFLAGS =  $(OMP_FLAGS) $(CPP_STD) $(OPT_FLAGS) # $(WARNING_FLAGS) $(STDLIB_FLAGS)
 # Optional: Use a faster linker like lld (if installed)
 # LDFLAGS += -fuse-ld=lld
 # CXXFLAGS += -fuse-ld=lld

@@ -1,8 +1,11 @@
 #include "utils.hpp" // 包含对应的头文件
 
 #include <cmath>   // 因为 getDist 使用了 sqrt
-#include <stdexcept> // 可选：用于错误处理
+
+#include <fstream>
+#include <iostream>
 #include <limits>    // 可选：用于返回无穷大等
+#include <sys/stat.h> // 用于 struct stat
 
 // --- 全局配置 (定义) ---
 namespace GlobalConfig {
@@ -14,9 +17,27 @@ namespace GlobalConfig {
     int proc_delay = 0;      // ms
     int prop_delay_coef = 0; // km/ms
     double prop_speed = 0;   // km/ms
+    int num_observers = 0;
     std::vector<std::array<double, 3>> sat_pos;
     std::vector<std::array<double, 3>> sat_lla;
     std::vector<std::pair<int, int>> latency_observers;
+
+    void loadObserverConfig(std::string observer_config_path) {
+        // check if the file exists
+        struct stat buffer;
+        if (stat(observer_config_path.c_str(), &buffer) != 0) {
+            std::cerr << "Observer config file not found: " << observer_config_path
+                      << std::endl;
+          exit(1);
+        }
+        auto ifs = std::ifstream(observer_config_path);
+        ifs >> GlobalConfig::num_observers;
+        for (int i = 0; i < GlobalConfig::num_observers; i++) {
+          int src, dst;
+          ifs >> src >> dst;
+          GlobalConfig::latency_observers.push_back(std::make_pair(src, dst));
+        }
+      }
 
 } // namespace GlobalConfig
 
@@ -78,3 +99,5 @@ World::World(std::vector<std::array<int, 5>> *cur_banned,
       sat_lla(sat_lla), sat_vel(sat_vel) {
     // 构造函数体，如果需要更多初始化代码
 }
+
+
