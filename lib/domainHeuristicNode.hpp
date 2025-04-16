@@ -1,95 +1,48 @@
-#pragma once
+// domain_heuristic_node.hpp
+#pragma once // Keep include guard
 
-#include "base.hpp"
-#include "json.hpp"
-#include "utils.hpp"
-// #include <iostream>
-#include <queue>
+// Necessary includes for declarations
+#include "base.hpp"     // For BaseNode, World, potentially futr_banned type, route_table type
+#include "json.hpp"     // For nlohmann::json (used in constructor)
+#include "utils.hpp"    // For GlobalConfig (used by static calcDomainCoords, maybe others)
+#include <vector>       // For vis, route_table parameter
+#include <string>       // For getName() return type
+#include <utility>      // For std::pair (return type of calcDomainCoords)
+#include <queue>        // Often needed by BFS implementation details, maybe move to .tpp if purely internal to compute()
 
+// Forward declarations if possible (reduces compile times if full definitions aren't needed)
+// class SomeType; // Example
 
-template <int Kp, int Kn> 
+template <int Kp, int Kn>
 class DomainHeuristicNode : public BaseNode {
 
-  std::vector<int> vis;
-  
-
+    std::vector<int> vis;
+    // Assuming 'route_table' and 'futr_banned' are accessible via BaseNode or elsewhere
 
 public:
-  DomainHeuristicNode(nlohmann::json config, int id, World world)
-      : BaseNode(config, id, world) {
-    // vis.resize(Kp * Kn, -1);
-    // route_table.resize(Kp * Kn, 0);
-  }
+    // --- Constructor ---
+    DomainHeuristicNode(nlohmann::json config, int id, World world);
 
-  static void DfsE2ePath(int src, int dst, const std::vector<int> route_table) {
-    int is_vertical = check_lla_status();
-    auto [I_src, J_src] =
-        calcDomainCoords(src); // 计算源节点的分域坐标
-    auto [I_dst, J_dst] =
-        calcDomainCoords(dst); // 计算目标节点的分域坐标
+    // --- Static Member Functions ---
+    // Calculates path cost within a domain using a precomputed route_table
+    static void DfsE2ePath(int src, int dst, const std::vector<int>& route_table); // Pass route_table by const reference
 
-    if (I_src == I_dst && J_src == J_dst) {
-      int val = 0, cur = src;
-      while (cur != dst) {
-        int nxt = route_table[cur];
-        val += calcuDelay(cur, nxt);
-        cur = nxt ;
-      }
-    }
-    return;
-  }
+    // Calculates domain coordinates (I, J) for a given satellite ID
+    static std::pair<int, int> calcDomainCoords(int satelliteId);
 
+    // --- Member Functions ---
+    std::string getName() override;
 
-  std::string getName() override { return "DomainHeuristicNode"; }
+    // Calculates the flat domain ID for a given satellite ID
+    int calculateDomainId(int satelliteId);
 
-  // std::vector<int> getRouteTable() {
-  //   // Return the route table for this node
-  //   return route_table;
-  // }
+    // Computes the intra-domain routing table (populates 'route_table') using BFS
+    void compute() override;
 
-  static std::pair<int, int> calcDomainCoords(int satelliteId) {
-    // 1. 反解 p(s) 和 n(s)
-    int n_s = satelliteId % GlobalConfig::Q;
-    int p_s = satelliteId / GlobalConfig::Q; // 使用整数除法
-
-    // 2. 应用分域函数
-    int I_s =
-        floor((double)p_s * Kp / GlobalConfig::P); // 显式转换为 double 以避免整数除法问题
-    int J_s =
-        floor((double)n_s * Kn / GlobalConfig::P); // 显式转换为 double 以避免整数除法问题
-
-    return std::make_pair(I_s, J_s);
-  }
-
-  int calculateDomainId(int satelliteId) {
-
-    auto [I_s, J_s] = calcDomainCoords(satelliteId);
-    return J_s * Kp + I_s;
-  }
-
-  void compute() override {
-    auto &banned = *futr_banned;
-    // impl bfs
-    std::queue<int> q;
-    q.push(id);
-    vis[id] = 1;
-    while (!q.empty()) {
-      int cur = q.front();
-      q.pop();
-      for (int i = 1; i < 5; i++) {
-        if (banned[cur][i] == 1) {
-          continue;
-        }
-        int nxt = move(cur,i);
-        if (calculateDomainId(cur) != calculateDomainId(nxt)) {
-          continue;
-        }
-        if (vis[nxt] == -1) {
-          vis[nxt] = 1;
-          q.push(nxt);
-          route_table[nxt] = cur;
-        }
-      }
-    }
-  }
+private:
+    // Declare private helper functions here if any
 };
+
+// --- Include the Template Implementation File ---
+// This line effectively brings the definitions into any file that includes this header.
+#include "domain_heuristic_node.tpp"
