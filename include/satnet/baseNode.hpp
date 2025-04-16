@@ -4,8 +4,15 @@
 
 class BaseNode {
     public:
-    BaseNode() = default;
+    int id;
+    BaseNode(int id) : id(id) {
+        // Constructor logic (if any)
+    }
     virtual ~BaseNode() = default;
+
+    virtual int move(int id, int dir);
+
+    virtual void compute();
     
     // This function is called when the node is created.
     virtual void init() ;
@@ -13,6 +20,5 @@ class BaseNode {
     // This function is called when the node is destroyed.
     virtual void destroy() ;
     
-    // This function is called to run the node.
-    virtual void run() ;
+
 };
