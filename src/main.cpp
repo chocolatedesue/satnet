@@ -2,7 +2,10 @@
 #include <string>
 #include <ostream>  // Include ostream explicitly for std::cerr
 #include <iostream> // Use angle brackets for standard headers
+
 #include "satnet/space.hpp"
+#include "satnet/baseNode.hpp"
+
 #define COMMA ,
 
 #define CASE(id, NodeType)                                                     \
@@ -31,7 +34,7 @@ int main(int argc, char **argv) {
   auto algorithm_id = atoi(argv[2]);
   init();
   std::cout << "Algorithm ID: " << algorithm_id
-            << " Algorithm Name: " << id2algorithmName[algorithm_id]
+            << ", Algorithm Name: " << id2algorithmName[algorithm_id]
             << std::endl;
 
   switch (algorithm_id) {

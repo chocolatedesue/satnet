@@ -37,15 +37,17 @@ void loadConfig(std::string config_path) {
         config["ISL_latency"]["propagation_delay_coef"];
     GlobalConfig::prop_speed = config["ISL_latency"]["propagation_speed"];
 
-    GlobalConfig::sat_pos = std::vector<std::array<double, 3>>(N);
-    GlobalConfig::sat_lla = std::vector<std::array<double, 3>>(N);
+
     GlobalConfig::P = config["constellation"]["num_of_orbit_planes"];
     GlobalConfig::Q = config["constellation"]["num_of_satellites_per_plane"];
     GlobalConfig::F = config["constellation"]["relative_spacing"];
     GlobalConfig::N = GlobalConfig::P * GlobalConfig::Q;
 
-    GlobalConfig::num_observers = config["num_observers"];
+    // GlobalConfig::num_observers = config["num_observers"];
     GlobalConfig::loadObserverConfig(config["observer_config_path"]);
+
+    GlobalConfig::sat_pos = std::vector<std::array<double, 3>>(GlobalConfig::N);
+    GlobalConfig::sat_lla = std::vector<std::array<double, 3>>(GlobalConfig::N);
   }
 }
 

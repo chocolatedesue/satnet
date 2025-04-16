@@ -3,6 +3,7 @@
 -- 设置项目元数据 (可选但推荐)
 set_project("satnet")
 set_version("1.0.0")
+add_rules("mode.debug")
 
 -- 定义主可执行文件目标
 target("satnet")
