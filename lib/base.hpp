@@ -1,7 +1,10 @@
 #ifndef BASE_HPP_
 #define BASE_HPP_
 
-#include "utils.h"
+#include <vector>
+#include <array>
+#include <string>
+#include "utils.hpp"
 #include "json.hpp"
 
 class BaseNode {
@@ -44,7 +47,7 @@ protected:
     }
 
 public:
-    BaseNode(json config, int id, World world
+    BaseNode(nlohmann::json config, int id, World world
         ): id(id) {
         P = config["constellation"]["num_of_orbit_planes"];
         Q = config["constellation"]["num_of_satellites_per_plane"];

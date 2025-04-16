@@ -1,5 +1,5 @@
 main: main.cpp lib/*
-	clang++ -stdlib=libc++ -fopenmp main.cpp ./lib/utils.cpp -o main -std=c++17 -O2
+	clang++ -stdlib=libc++ -fopenmp main.cpp -o main -std=c++17 -O2
 
 init:
 	sudo apt update && \

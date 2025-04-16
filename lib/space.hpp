@@ -2,9 +2,10 @@
 #define SATSIM_SPACE_HPP_
 
 #include<vector>
-#include<set>
 #include<map>
 #include<queue>
+
+
 #include<ctime>
 #include<cstdio>
 #include<algorithm>
@@ -23,7 +24,7 @@
 #include <sys/types.h>
 #include "dirent.h"
 
-#include "utils.h"
+#include "utils.hpp"
 
 #include "json.hpp"
 #include "omp.h"
@@ -38,6 +39,9 @@ using json = nlohmann::json;
 #include "minhopcount.hpp"
 #include "lbp.hpp"
 #include "ngdomain.hpp"
+// #include  "nxtNode.hpp"
+#include "domainHeuristicNode.hpp"
+
 
 class Average {
 private:
@@ -58,15 +62,16 @@ public:
 
 template<class T>
 class SpaceSimulation {
+
 private:
     std::string name;
     std::string algorithm;
 
     int P, Q, F, N;
 
-    double proc_delay;
-    double prop_delay_coef;
-    double prop_speed;
+    // static double proc_delay;
+    // static double prop_delay_coef;
+    // static double prop_speed;
 
     int start_time;
     int step;
@@ -76,7 +81,7 @@ private:
 
     int num_observers;
     unsigned seed;
-    std::vector<std::pair<int,int> > latency_observers;
+    
 
     std::vector<T> nodes;
     std::vector<std::vector<int> > route_tables;
@@ -98,8 +103,8 @@ private:
 
     std::vector<std::array<int, 5> > cur_banned;
     std::vector<std::array<int, 5> > futr_banned;
-    std::vector<std::array<double, 3> > sat_pos;
-    std::vector<std::array<double, 3> > sat_lla;
+    // static std::vector<std::array<double, 3> > sat_pos;
+    // static std::vector<std::array<double, 3> > sat_lla;
     std::vector<double> sat_vel;
 
 
@@ -146,18 +151,8 @@ private:
         return x * Q + y;
     }
 
-    double getDist(int a, int b) {
-        double res = 0;
-        for(int i = 0; i < 3; i++) {
-            double d = sat_pos[a][i] - sat_pos[b][i];
-            res += d * d;
-        }
-        return sqrt(res) * 1000;
-    }
 
-    double calcuDelay(int a, int b) {
-        return proc_delay + prop_delay_coef * getDist(a, b) / prop_speed * 1000;
-    }
+
 
     std::pair<double, bool> computeLatency(int src, int dst) {
         int cur = src;
@@ -276,8 +271,8 @@ private:
         fprintf(fout, "update entry: %f\n", update_entry_result.getResult());
         fprintf(fout, "number of observers: %d\n", num_observers);
         for(int i = 0; i < num_observers; i++) {
-            auto src = latency_observers[i].first;
-            auto dst = latency_observers[i].second; 
+            auto src = GlobalConfig::latency_observers[i].first;
+            auto dst = GlobalConfig::latency_observers[i].second; 
             auto latency = latency_results[i].getResult();
             auto failure_rate = failure_rates[i].getResult();
             fprintf(fout, "route path [%d, %d]\n\tlatency: %f\n\tfailure rate: %f\n", src, dst, latency, failure_rate);
@@ -297,13 +292,15 @@ private:
         for(int i = 0; i < num_observers; i++) {
             int src, dst;
             ifs >> src >> dst;
-            latency_observers.push_back(std::make_pair(src, dst));
+            GlobalConfig::latency_observers.push_back(std::make_pair(src, dst));
         }
     }
 
 public:
     SpaceSimulation(std::string config_file_name) {
         auto config = json::parse(std::ifstream(config_file_name));
+        
+        // GlobalConfig& cfg1 = GlobalConfig::getInstance();
 
         name = config["name"];
         P = config["constellation"]["num_of_orbit_planes"];
@@ -311,9 +308,13 @@ public:
         F = config["constellation"]["relative_spacing"];
         N = P * Q;
 
+        // cfg1.P = P, cfg1.Q = Q, cfg1.F = F, cfg1.N = N;
+        using namespace GlobalConfig;
         proc_delay = config["ISL_latency"]["processing_delay"];
         prop_delay_coef = config["ISL_latency"]["propagation_delay_coef"];
         prop_speed = config["ISL_latency"]["propagation_speed"];
+        sat_pos_dir = config["sat_position_dir"];
+        sat_lla_dir = config["sat_lla_dir"];
 
         step = config["step_length"];
         duration = config["duration"];
@@ -334,8 +335,7 @@ public:
         }
 
         isl_state_dir = config["isl_state_dir"];
-        sat_pos_dir = config["sat_position_dir"];
-        sat_lla_dir = config["sat_lla_dir"];
+
         sat_vel_dir = config["sat_velocity_dir"];
         report_dir = config["report_dir"];
         if(config.count("dawn_dusk_dir")) {
@@ -482,12 +482,12 @@ public:
                         total_diff_count += diff;
                     }
 
-                    #pragma omp critical
-                    {
-                        if(dump_rib[i]) {
-                            save_rib(cur_table, i);
-                        }
-                    }
+                    // #pragma omp critical
+                    // {
+                    //     if(dump_rib[i]) {
+                    //         save_rib(cur_table, i);
+                    //     }
+                    // }
                 }
 
                 // 单次添加汇总数据，避免循环
@@ -517,8 +517,8 @@ public:
 
 
             for(int i = 0; i < num_observers; i++) {
-                auto src = latency_observers[i].first;
-                auto dst = latency_observers[i].second;
+                auto src = GlobalConfig::latency_observers[i].first;
+                auto dst = GlobalConfig::latency_observers[i].second;
                 auto [latency, success] = computeLatency(src, dst);
                 if(success) {           
                     failure_rates[i].add(0);
@@ -540,6 +540,7 @@ private:
     std::vector<std::vector<double> > frame_nodes_3d;
 
     void dump_nodes() {
+        using namespace GlobalConfig;
         for(int i = 0; i < N; i++) {
             auto node_pos = std::make_pair(sat_lla[i][1], sat_lla[i][0]);
             auto node = std::make_pair(node_pos, 0);
@@ -679,6 +680,7 @@ private:
 
     
     void load_sat_lla() {
+        using namespace GlobalConfig;
         std::string sat_lla_filename = sat_lla_dir + "/" + std::to_string(cur_time) + ".csv";
         auto ifs = std::ifstream(sat_lla_filename);
         for(int i = 0; i < N; i++) {
@@ -687,6 +689,7 @@ private:
     }
 
     void load_sat_pos() {
+        using namespace GlobalConfig;
         auto ifs = std::ifstream(sat_pos_dir + "/" + std::to_string(cur_time) + ".csv");
         for(int i = 0; i < N; i++) {
             ifs >> sat_pos[i][0] >> sat_pos[i][1] >> sat_pos[i][2];

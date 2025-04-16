@@ -1,0 +1,80 @@
+#include "utils.hpp" // 包含对应的头文件
+
+#include <cmath>   // 因为 getDist 使用了 sqrt
+#include <stdexcept> // 可选：用于错误处理
+#include <limits>    // 可选：用于返回无穷大等
+
+// --- 全局配置 (定义) ---
+namespace GlobalConfig {
+    // 提供变量的实际定义和初始化
+    int P = 0; // 示例初始化，根据需要修改
+    int Q = 0;
+    int F = 0;
+    int N = 0;
+    int proc_delay = 0;      // ms
+    int prop_delay_coef = 0; // km/ms
+    double prop_speed = 0;   // km/ms
+    std::vector<std::array<double, 3>> sat_pos;
+    std::vector<std::array<double, 3>> sat_lla;
+    std::vector<std::pair<int, int>> latency_observers;
+
+} // namespace GlobalConfig
+
+// --- 函数定义 ---
+int check_lla_status() {
+    // 如果有更复杂的逻辑，在这里实现
+    return 1;
+}
+
+// 注意：移除了 static
+double getDist(int a, int b) {
+    // 添加基本的边界检查是个好主意
+    if (a < 0 || static_cast<size_t>(a) >= GlobalConfig::sat_pos.size() ||
+        b < 0 || static_cast<size_t>(b) >= GlobalConfig::sat_pos.size()) {
+        // 处理错误，例如抛出异常或返回一个特殊值 (NaN)
+        // throw std::out_of_range("Index out of bounds in getDist");
+         return std::nan(""); // 返回 Not-a-Number
+    }
+
+    double res = 0;
+    for (int i = 0; i < 3; i++) {
+        double d = GlobalConfig::sat_pos[a][i] - GlobalConfig::sat_pos[b][i];
+        res += d * d;
+    }
+    // 原始代码在这里乘以 1000，检查这是否符合你的意图（距离单位？）
+    return sqrt(res) * 1000;
+}
+
+double calcuDelay(int a, int b) {
+    double dist_scaled = getDist(a, b); // 注意 getDist 可能返回 NaN
+
+    // 处理 getDist 可能返回的错误
+    if (std::isnan(dist_scaled)) {
+        return std::nan(""); // 或者传播错误
+    }
+
+    // 避免除以零
+    if (GlobalConfig::prop_speed == 0) {
+        // 返回无穷大或抛出异常
+        // throw std::runtime_error("Propagation speed is zero in calcuDelay");
+        return std::numeric_limits<double>::infinity();
+    }
+
+    // 再次检查这个公式和单位是否正确
+    // delay = proc_delay (ms) + prop_delay_coef * dist_scaled / prop_speed * 1000
+    // 如果 getDist 返回 km*1000, prop_delay_coef 是 km/ms, prop_speed 是 km/ms
+    // 单位: ms + (km/ms) * (km*1000) / (km/ms) * 1000 = ms + km * 1000 * 1000 ? 单位似乎不匹配
+    // 请仔细核对公式和单位！
+    return GlobalConfig::proc_delay + GlobalConfig::prop_delay_coef * dist_scaled / GlobalConfig::prop_speed * 1000;
+}
+
+// --- Struct World 构造函数定义 (如果不在头文件中内联定义) ---
+World::World(std::vector<std::array<int, 5>> *cur_banned,
+             std::vector<std::array<int, 5>> *futr_banned,
+             std::vector<std::array<double, 3>> *sat_pos,
+             std::vector<std::array<double, 3>> *sat_lla,
+             std::vector<double> *sat_vel)
+    : cur_banned(cur_banned), futr_banned(futr_banned), sat_pos(sat_pos),
+      sat_lla(sat_lla), sat_vel(sat_vel) {
+    // 构造函数体，如果需要更多初始化代码
+}

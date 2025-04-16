@@ -262,7 +262,7 @@ def main():
     print ("算法ID映射:", algorithm_id_dict)
     
     # 定义目标场景
-    target_list = ["full example - Apr", "full gw - Oct"]
+    target_list = ["full full-gw-2000 - Jan", "startlink-v2-group5-Jan", "startlink-v2-group5-Apr","startlink-v2-group5-Jul"]
     
     # 定义算法名称映射
     algorithm_mapping = {

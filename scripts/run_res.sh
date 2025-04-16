@@ -10,6 +10,9 @@
 
 # config=configs/full-April.json
 # 将读取到的第一个参数赋值给变量config
+# 打印 总耗时
+
+start_time=$(date +%s)
 config=$1
 
 # 如果没有传入参数，则报错
@@ -34,3 +37,9 @@ for ((i = 1000; i <= 9999; i++))
 do
     ./main  $config  $i 
 done
+
+end_time=$(date +%s)
+
+# 计算总耗时
+total_time=$((end_time - start_time))
+echo "Total time: $total_time seconds"
