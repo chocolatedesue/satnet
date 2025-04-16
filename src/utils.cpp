@@ -28,27 +28,33 @@ std::vector<std::array<double, 3>> sat_pos;
 std::vector<std::array<double, 3>> sat_lla;
 std::vector<std::pair<int, int>> latency_observers;
 
+std::vector<std::array<int, 5>> cur_banned;
+std::vector<std::array<int, 5>> futr_banned;
+
 void loadConfig(std::string config_path) {
   auto config = json::parse(std::ifstream(config_path));
-  {
-    // using namespace GlobalConfig;
-    GlobalConfig::proc_delay = config["ISL_latency"]["processing_delay"];
-    GlobalConfig::prop_delay_coef =
-        config["ISL_latency"]["propagation_delay_coef"];
-    GlobalConfig::prop_speed = config["ISL_latency"]["propagation_speed"];
 
+  // using namespace GlobalConfig;
+  GlobalConfig::proc_delay = config["ISL_latency"]["processing_delay"];
+  GlobalConfig::prop_delay_coef =
+      config["ISL_latency"]["propagation_delay_coef"];
+  GlobalConfig::prop_speed = config["ISL_latency"]["propagation_speed"];
 
-    GlobalConfig::P = config["constellation"]["num_of_orbit_planes"];
-    GlobalConfig::Q = config["constellation"]["num_of_satellites_per_plane"];
-    GlobalConfig::F = config["constellation"]["relative_spacing"];
-    GlobalConfig::N = GlobalConfig::P * GlobalConfig::Q;
+  GlobalConfig::P = config["constellation"]["num_of_orbit_planes"];
+  GlobalConfig::Q = config["constellation"]["num_of_satellites_per_plane"];
+  GlobalConfig::F = config["constellation"]["relative_spacing"];
+  GlobalConfig::N = GlobalConfig::P * GlobalConfig::Q;
 
-    // GlobalConfig::num_observers = config["num_observers"];
-    GlobalConfig::loadObserverConfig(config["observer_config_path"]);
+  // GlobalConfig::num_observers = config["num_observers"];
+  GlobalConfig::loadObserverConfig(config["observer_config_path"]);
 
-    GlobalConfig::sat_pos = std::vector<std::array<double, 3>>(GlobalConfig::N);
-    GlobalConfig::sat_lla = std::vector<std::array<double, 3>>(GlobalConfig::N);
-  }
+  GlobalConfig::sat_pos = std::vector<std::array<double, 3>>(GlobalConfig::N);
+  GlobalConfig::sat_lla = std::vector<std::array<double, 3>>(GlobalConfig::N);
+
+  GlobalConfig::cur_banned =
+      std::vector<std::array<int, 5>>(GlobalConfig::N, {0, 0, 0, 0, 0});
+  GlobalConfig::futr_banned =
+      std::vector<std::array<int, 5>>(GlobalConfig::N, {0, 0, 0, 0, 0});
 }
 
 void loadObserverConfig(std::string observer_config_path) {

@@ -23,6 +23,9 @@ extern std::vector<std::pair<int, int>> latency_observers;
 extern void loadObserverConfig(std::string observer_config_path);
 extern void loadConfig(std::string config_path);
 
+extern std::vector<std::array<int, 5>> cur_banned;
+extern std::vector<std::array<int, 5>> futr_banned;
+
 } // namespace GlobalConfig
 
 // --- 函数声明 ---

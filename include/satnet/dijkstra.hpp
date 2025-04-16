@@ -1,136 +1,71 @@
-#ifndef DIJKSTRA_HPP_
-#define DIJKSTRA_HPP_
+#pragma once
 
-#include "discoroute.hpp"
+#include <vector>
+#include <string>
+#include <cmath> 
+#include <limits> 
+#include <array>
+#include <queue> 
 
-class DijkstraNode : public DisCoRouteNode {
+#include "satnet/base.hpp" 
+#include "utils.hpp"          
+#include "nlohmann/json.hpp"   
+
+using json = nlohmann::json;
+
+/**
+ * @brief Base class for Dijkstra routing nodes.
+ */
+class DijkstraNode : public BaseNode { // Or potentially public DisCoRouteNode
 private:
-    double proc_delay;
-    double prop_delay_coef;
-    double prop_speed;
-    
-    double getDist(int a, int b) {
-        double res = 0;
-        for(int i = 0; i < 3; i++) {
-            double d = sat_pos->at(a)[i] - sat_pos->at(b)[i];
-            res += d * d;
-        }
-        return sqrt(res) * 1000;
-    }
+
+
+    double getDist(int a, int b); // Calculate distance between nodes a and b
 
 protected:
-    std::vector<int> vis;
-    std::vector<double> dist;
+    std::vector<int> vis;   // Visited flags (size N)
+    std::vector<double> dist; // Distance array (size N)
+    // route_table is assumed inherited
 
-    double calcuDelay(int a, int b) {
-        return proc_delay + prop_delay_coef * getDist(a, b) / prop_speed * 1000;
-    }
-    
+    double calcuDelay(int a, int b); // Calculate link delay between a and b
+
 public:
-    DijkstraNode(json config, int id, World world
-        ): DisCoRouteNode(config, id, world),
-        vis(N), dist(N) {
-            proc_delay = config["ISL_latency"]["processing_delay"];
-            prop_delay_coef = config["ISL_latency"]["propagation_delay_coef"];
-            prop_speed = config["ISL_latency"]["propagation_speed"];
-        }
+    DijkstraNode(int id);
+    virtual ~DijkstraNode() = default;
 
-    virtual std::string getName() override {
-        return "DijkstraBase";
-    }
+    virtual std::string getName() override;
+    virtual void compute() override; // Compute routes using standard Dijkstra
 
-    virtual void compute() override {
-        for(int i = 0; i < N; i++) {
-            vis[i] = 0;
-            dist[i] = DBL_MAX;
-            route_table[i] = 0;
-        }
-
-        std::priority_queue<std::pair<double, int> > pq;
-        
-        dist[id] = 0;
-        pq.push(std::make_pair(0, id));
-        while(!pq.empty()) {
-            int u = pq.top().second;
-            pq.pop();
-            
-            if(vis[u]) continue;
-            vis[u] = 1;
-
-            for(int i = 1; i <= 4; i++) {
-                int v = move(u, i);
-                double w = calcuDelay(u, v);
-                if(dist[u] + w < dist[v]) {
-                    dist[v] = dist[u] + w;
-                    pq.push(std::make_pair(-dist[v], v));
-                    route_table[v] = (u == id ? i : route_table[u]);
-                }
-            }
-        }
-    }
 };
 
+
+/**
+ * @brief Dijkstra variant considering currently banned ports.
+ */
 class DijkstraProbeNode : public DijkstraNode {
 protected:
-    void computeWithBannedPorts(std::vector<std::array<int, 5> > *banned_ptr) {
-        auto &banned = *banned_ptr;
-        for(int i = 0; i < N; i++) {
-            vis[i] = 0;
-            dist[i] = DBL_MAX;
-            route_table[i] = 0;
-        }
-
-        std::priority_queue<std::pair<double, int> > pq;
-        
-        dist[id] = 0;
-        pq.push(std::make_pair(0, id));
-        while(!pq.empty()) {
-            int u = pq.top().second;
-            pq.pop();
-            
-            if(vis[u]) continue;
-            vis[u] = 1;
-
-            for(int i = 1; i <= 4; i++) {
-                int v = move(u, i);
-                if(banned[u][i]) {
-                    continue;
-                }
-                double w = calcuDelay(u, v);
-                if(dist[u] + w < dist[v]) {
-                    dist[v] = dist[u] + w;
-                    pq.push(std::make_pair(-dist[v], v));
-                    route_table[v] = (u == id ? i : route_table[u]);
-                }
-            }
-        }
-    }
+    // Compute routes avoiding specific ports
+    void computeWithBannedPorts(const std::vector<std::array<int, 5>>* banned_ptr); 
 
 public:
-    DijkstraProbeNode(json config, int id, World world
-        ): DijkstraNode(config, id, world) {}
-    
-    virtual std::string getName() override {
-        return "DijkstraProbe";
-    }
+    DijkstraProbeNode(int id);
+    virtual ~DijkstraProbeNode() = default;
 
-    virtual void compute() override {
-        computeWithBannedPorts(cur_banned);
-    }
+    virtual std::string getName() override;
+    // Compute routes using current banned ports (cur_banned)
+    virtual void compute() override; 
 };
 
 
-class DijkstraPredNode : public DijkstraProbeNode {
+/**
+ * @brief Dijkstra variant considering predicted future banned ports.
+ */
+class DijkstraPredNode : public DijkstraProbeNode { 
 public:
-    DijkstraPredNode(json config, int id, World world
-        ): DijkstraProbeNode(config, id, world) {}
+    DijkstraPredNode(int id);
+    virtual ~DijkstraPredNode() = default;
 
-    virtual std::string getName() override {
-        return "DijkstraPred";
-    }
-
-    virtual void compute() override {
-        computeWithBannedPorts(futr_banned);
-    }
+    virtual std::string getName() override;
+    // Compute routes using future predicted banned ports (futr_banned)
+    virtual void compute() override; 
 };
-#endif

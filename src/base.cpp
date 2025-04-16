@@ -1,9 +1,21 @@
-#include "satnet/baseNode.hpp"
+#include "satnet/base.hpp"
 #include "satnet/utils.hpp" // 包含对应的头文件
 #include <iostream>
 
 // Constructor and Destructor use the default implementations provided in the
 // header.
+
+BaseNode::BaseNode(int id)
+    : id(id), route_table(GlobalConfig::N) {
+  // Initialize the node with the given configuration
+  // For example, you might want to set up some parameters based on the config
+  // file.
+  init();
+}
+
+std::string BaseNode::getName() {
+  return "BaseNode"; // Default name, can be overridden in derived classes
+}
 
 int BaseNode::move(int id, int dir) {
   using namespace GlobalConfig;
@@ -34,14 +46,13 @@ int BaseNode::move(int id, int dir) {
 }
 
 void BaseNode::init() {
-  // Basic initialization logic (e.g., printing a message)
-  std::cout << "BaseNode initialized." << std::endl;
+  this -> cur_banned = &GlobalConfig::cur_banned;
+  this -> futr_banned = &GlobalConfig::futr_banned;
+  this -> sat_pos = &GlobalConfig::sat_pos;
+  this -> sat_lla = &GlobalConfig::sat_lla;
+
 }
 
-void BaseNode::destroy() {
-  // Basic destruction logic (e.g., printing a message)
-  std::cout << "BaseNode destroyed." << std::endl;
-}
 
 void BaseNode::compute() {
   // Basic run logic (e.g., printing a message)

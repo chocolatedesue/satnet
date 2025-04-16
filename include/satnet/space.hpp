@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "satnet/baseNode.hpp"
+
 
 template <class T> class SpaceSimulation {
 

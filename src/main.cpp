@@ -1,48 +1,80 @@
-#include <map>
+#include <iostream>
 #include <string>
-#include <ostream>  // Include ostream explicitly for std::cerr
-#include <iostream> // Use angle brackets for standard headers
+#include <string_view>
+#include <unordered_map>
+#include <stdexcept>
 
+#include "satnet/base.hpp"
+#include "satnet/dijkstra.hpp"
 #include "satnet/space.hpp"
-#include "satnet/baseNode.hpp"
 
-#define COMMA ,
-
-#define CASE(id, NodeType)                                                     \
-  case id:                                                                     \
-    (SpaceSimulation<NodeType>(config_file_name)).run();                       \
-    break;
-
-static std::map<int, std::string> id2algorithmName;
-
-static void init() {
-  id2algorithmName[1000] = "BaseNode";
-  id2algorithmName[2003] = "CoinFlipPredNode";
-  id2algorithmName[3003] = "DijkstraPredNode";
-  id2algorithmName[5001] = "MinHopCountNode";
-  id2algorithmName[5100] = "DomainHeuristicNode<10 COMMA 10>";
+// Define algorithm IDs as enum class for type safety
+namespace satnet {
+    enum class AlgorithmId {
+        BASE_NODE = 1000,
+        COIN_FLIP_PRED_NODE = 2003,
+        DIJKSTRA_PRED_NODE = 3003, 
+        MIN_HOP_COUNT_NODE = 5001,
+        DOMAIN_HEURISTIC_NODE = 5100
+    };
 }
 
-int main(int argc, char **argv) {
-  // assert(argc == 3);
-  if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <config_file> <algorithm_id>"
-              << std::endl;
-    return 1;
-  }
-  auto config_file_name = std::string(argv[1]);
-  auto algorithm_id = atoi(argv[2]);
-  init();
-  std::cout << "Algorithm ID: " << algorithm_id
-            << ", Algorithm Name: " << id2algorithmName[algorithm_id]
-            << std::endl;
+// Template function to run simulation with specific node type
+template<typename NodeType>
+void runSimulation(const std::string& configFile) {
+    SpaceSimulation<NodeType>(configFile).run();
+}
 
-  switch (algorithm_id) {
-    CASE(1000, BaseNode);
+int main(int argc, char** argv) {
+    // Validate command-line arguments
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <config_file> <algorithm_id>" << std::endl;
+        return EXIT_FAILURE;
+    }
 
-  default:
-    std::cerr << "Invalid algorithm ID!" << std::endl;
-  }
+    // Parse command-line arguments
+    const std::string configFileName(argv[1]);
+    const int algorithmId = std::stoi(argv[2]);
 
-  return 0;
+    // Map algorithm IDs to their names for display purposes
+    const std::unordered_map<int, std::string> algorithmNames = {
+        {static_cast<int>(satnet::AlgorithmId::BASE_NODE), "BaseNode"},
+        {static_cast<int>(satnet::AlgorithmId::COIN_FLIP_PRED_NODE), "CoinFlipPredNode"},
+        {static_cast<int>(satnet::AlgorithmId::DIJKSTRA_PRED_NODE), "DijkstraPredNode"},
+        {static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_NODE), "MinHopCountNode"},
+        {static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE), "DomainHeuristicNode<10, 10>"}
+    };
+
+    try {
+        // Display selected algorithm
+        std::cout << "Algorithm ID: " << algorithmId
+                  << ", Algorithm Name: " << algorithmNames.at(algorithmId)
+                  << std::endl;
+
+        // Run appropriate simulation based on algorithm ID
+        switch (algorithmId) {
+            case static_cast<int>(satnet::AlgorithmId::BASE_NODE):
+                runSimulation<BaseNode>(configFileName);
+                break;
+
+   
+            case static_cast<int>(satnet::AlgorithmId::DIJKSTRA_PRED_NODE):
+                runSimulation<DijkstraPredNode>(configFileName);
+                break;
+            // Add other algorithm cases here
+            default:
+                std::cerr << "Invalid algorithm ID: " << algorithmId << std::endl;
+                return EXIT_FAILURE;
+        }
+    }
+    catch (const std::out_of_range&) {
+        std::cerr << "Unknown algorithm ID: " << algorithmId << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
