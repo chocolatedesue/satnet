@@ -1,0 +1,63 @@
+satsim/constellations
+__pycache__
+.vscode
+main
+a.out
+a.txt
+data
+output*
+cdf_plot_data
+frame_data
+summary*.csv
+plot_figs
+rib
+old/
+
+.cache
+build
+# Prerequisites
+*.d
+.xmake
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
