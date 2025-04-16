@@ -1,5 +1,4 @@
-#ifndef UTILS_H_
-#define UTILS_H_
+#pragma once
 
 #include <array>
 #include <string>
@@ -19,12 +18,14 @@ extern double prop_speed;   // km/ms
 extern int num_observers;
 extern std::vector<std::array<double, 3>> sat_pos;
 extern std::vector<std::array<double, 3>> sat_lla;
+extern std::vector<double> sat_vel; // Movement direction? (单位?)
 extern std::vector<std::pair<int, int>> latency_observers;
 extern void loadObserverConfig(std::string observer_config_path);
 extern void loadConfig(std::string config_path);
 
 extern std::vector<std::array<int, 5>> cur_banned;
 extern std::vector<std::array<int, 5>> futr_banned;
+extern std::string sat_vel_dir;
 
 } // namespace GlobalConfig
 
@@ -59,4 +60,20 @@ struct World {
   //       sat_lla(sat_lla), sat_vel(sat_vel) {}
 };
 
-#endif // UTILS_H_
+int getPort(int u, int v, int &u_port, int &v_port);
+// int is_nearby(int a, int b);
+int move(int u, int dir);
+
+class Average {
+private:
+  double sum, mx;
+  int cnt;
+
+public:
+  Average() {
+    sum = 0.0, cnt = 0;
+    mx = 0;
+  }
+  void add(double val) { sum += val, cnt++; }
+  double getResult() { return cnt ? sum / cnt : 0; }
+};

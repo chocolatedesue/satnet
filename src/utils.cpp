@@ -30,6 +30,7 @@ std::vector<std::pair<int, int>> latency_observers;
 
 std::vector<std::array<int, 5>> cur_banned;
 std::vector<std::array<int, 5>> futr_banned;
+std::vector<double> sat_vel;
 
 void loadConfig(std::string config_path) {
   auto config = json::parse(std::ifstream(config_path));
@@ -55,6 +56,8 @@ void loadConfig(std::string config_path) {
       std::vector<std::array<int, 5>>(GlobalConfig::N, {0, 0, 0, 0, 0});
   GlobalConfig::futr_banned =
       std::vector<std::array<int, 5>>(GlobalConfig::N, {0, 0, 0, 0, 0});
+  GlobalConfig::sat_vel = std::vector<double>(GlobalConfig::N, 0.0);
+
 }
 
 void loadObserverConfig(std::string observer_config_path) {
@@ -135,4 +138,50 @@ World::World(std::vector<std::array<int, 5>> *cur_banned,
     : cur_banned(cur_banned), futr_banned(futr_banned), sat_pos(sat_pos),
       sat_lla(sat_lla), sat_vel(sat_vel) {
   // 构造函数体，如果需要更多初始化代码
+}
+
+int getPort(int u, int v, int &u_port, int &v_port) {
+  u_port = v_port = 0;
+  for (int i = 1; i <= 4; i++) {
+    if (move(u, i) == v) {
+      u_port = i;
+    }
+    if (move(v, i) == u) {
+      v_port = i;
+    }
+    /*
+    std::cerr << u << ' ' << i << ' ' << move(u, i) << std::endl;
+    std::cerr << v << ' ' << i << ' ' << move(v, i) << std::endl;
+    */
+  }
+  return u_port != 0 && v_port != 0;
+
+}
+
+int move(int u, int dir) {
+  using namespace GlobalConfig;
+  int x = u / Q;
+  int y = u % Q;
+  if (dir == 1) {
+    y = (y - 1 + Q) % Q;
+  } else if (dir == 2) {
+    if (x == P - 1) {
+      x = 0;
+      y = (y + F) % Q;
+    } else {
+      x = x + 1;
+    }
+  } else if (dir == 3) {
+    y = (y + 1) % Q;
+  } else if (dir == 4) {
+    if (x == 0) {
+      x = P - 1;
+      y = (y - F + Q) % Q;
+    } else {
+      x = x - 1;
+    }
+  } else {
+    // do nothing
+  }
+  return x * Q + y;
 }
