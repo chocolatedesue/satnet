@@ -26,8 +26,8 @@ private:
   Average compute_time_result;
   Average update_entry_result;
 
-  std::vector<Average> latency_results;
-  std::vector<Average> failure_rates;
+  // std::vector<Average> latency_results;
+  // std::vector<Average> failure_rates;
   // std::string frames_dir;
   // std::string dawn_dust_dir;
   // std::string dawn_dusk_icrs_dir;

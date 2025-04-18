@@ -31,6 +31,8 @@ std::vector<std::pair<int, int>> latency_observers;
 std::vector<std::array<int, 5>> cur_banned;
 std::vector<std::array<int, 5>> futr_banned;
 std::vector<double> sat_vel;
+std::vector<Average> latency_results;
+std::vector<Average> failure_rates;
 
 void loadConfig(std::string config_path) {
   auto config = json::parse(std::ifstream(config_path));
@@ -57,6 +59,11 @@ void loadConfig(std::string config_path) {
   GlobalConfig::futr_banned =
       std::vector<std::array<int, 5>>(GlobalConfig::N, {0, 0, 0, 0, 0});
   GlobalConfig::sat_vel = std::vector<double>(GlobalConfig::N, 0.0);
+
+  GlobalConfig::latency_results =
+      std::vector<Average>(GlobalConfig::num_observers);
+  GlobalConfig::failure_rates =
+      std::vector<Average>(GlobalConfig::num_observers);
 
 }
 

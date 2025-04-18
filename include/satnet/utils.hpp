@@ -8,26 +8,6 @@
 // --- 类型定义 ---
 enum Direction { UP = 1, RIGHT = 2, DOWN = 3, LEFT = 4 };
 
-// --- 全局配置 (声明) ---
-namespace GlobalConfig {
-// 使用 extern 声明变量
-extern int P, Q, F, N;
-extern int proc_delay;      // ms
-extern int prop_delay_coef; // km/ms (原始警告变量)
-extern double prop_speed;   // km/ms
-extern int num_observers;
-extern std::vector<std::array<double, 3>> sat_pos;
-extern std::vector<std::array<double, 3>> sat_lla;
-extern std::vector<double> sat_vel; // Movement direction? (单位?)
-extern std::vector<std::pair<int, int>> latency_observers;
-extern void loadObserverConfig(std::string observer_config_path);
-extern void loadConfig(std::string config_path);
-
-extern std::vector<std::array<int, 5>> cur_banned;
-extern std::vector<std::array<int, 5>> futr_banned;
-extern std::string sat_vel_dir;
-
-} // namespace GlobalConfig
 
 // --- 函数声明 ---
 int check_lla_status();
@@ -42,6 +22,8 @@ struct World {
   std::vector<std::array<double, 3>>
       *sat_lla;                 // Latitude, longitude, attitude (km)
   std::vector<double> *sat_vel; // Movement direction? (单位?)
+
+  
 
   // 构造函数声明（可选：也可以将实现移到 .cpp）
   World(std::vector<std::array<int, 5>> *cur_banned,
@@ -77,3 +59,29 @@ public:
   void add(double val) { sum += val, cnt++; }
   double getResult() { return cnt ? sum / cnt : 0; }
 };
+
+
+// --- 全局配置 (声明) ---
+namespace GlobalConfig {
+  // 使用 extern 声明变量
+  extern int P, Q, F, N;
+  extern int proc_delay;      // ms
+  extern int prop_delay_coef; // km/ms (原始警告变量)
+  extern double prop_speed;   // km/ms
+  extern int num_observers;
+  extern std::vector<std::array<double, 3>> sat_pos;
+  extern std::vector<std::array<double, 3>> sat_lla;
+  extern std::vector<double> sat_vel; // Movement direction? (单位?)
+  extern std::vector<std::pair<int, int>> latency_observers;
+  extern void loadObserverConfig(std::string observer_config_path);
+  extern void loadConfig(std::string config_path);
+  
+  extern std::vector<std::array<int, 5>> cur_banned;
+  extern std::vector<std::array<int, 5>> futr_banned;
+  extern std::string sat_vel_dir;
+  
+  extern std::vector<Average> latency_results;
+  extern std::vector<Average> failure_rates;
+  
+  } // namespace GlobalConfig
+  
