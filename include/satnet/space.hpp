@@ -17,6 +17,7 @@ private:
   int update_period;
   int refresh_period;
 
+
   std::string isl_state_dir;
   std::string sat_pos_dir;
   std::string sat_lla_dir;

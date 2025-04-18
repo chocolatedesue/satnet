@@ -11,11 +11,11 @@
             "program": "${workspaceFolder}/build/linux/x86_64/debug/satnet",
             "args": [
                 "${workspaceFolder}/configs/ng-full-starlink_group5-Jan.json",
-                "1000"
+                "3003"
             ],
      
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

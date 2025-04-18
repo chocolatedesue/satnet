@@ -7,10 +7,17 @@
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <array>
+#include <filesystem> // 需要 C++17
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <vector>
 
 using json = nlohmann::json;
+namespace fs = std::filesystem;
 
 template <class T>
 SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
@@ -37,9 +44,36 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
     start_time = 0;
   }
 
+  isl_state_dir = config["isl_state_dir"];
+
+  sat_vel_dir = config["sat_velocity_dir"];
+  report_dir = config["report_dir"].get<std::string>();
+
+  fs::path report_dir_path(report_dir);
+  std::error_code ec;
+
+  // 尝试创建目录，如果已存在则返回 false，出错则设置 ec
+  bool created = fs::create_directories(report_dir_path, ec);
+
+  if (!ec) {
+    if (created) {
+      std::cout << "report_dir: " << report_dir_path.string() << " created\n";
+    } else {
+      std::cout << "report_dir: " << report_dir_path.string()
+                << " already exists\n";
+    }
+  }
+  seed = 42;
+  srand(seed);
+
+  route_tables = std::vector<std::vector<int>>(
+      GlobalConfig::N, std::vector<int>(GlobalConfig::N));
+
   for (int i = 0; i < GlobalConfig::N; ++i) {
     nodes.push_back(T(i));
   }
+
+  
 }
 
 template <class T> void SpaceSimulation<T>::load_sat_pos() {
@@ -89,7 +123,16 @@ void SpaceSimulation<T>::readIslStateFlie(
   while (ifs >> u >> v) {
     int u_port, v_port;
     //            std::cerr << u << ' ' << v << std::endl;
-
+    int res = getPort(u, v, u_port, v_port);
+    if (!res) {
+      // Use std::cout and std::endl consistently
+      std::cerr << "Error: Not consistent with the topology" << std::endl; // Prefer std::cerr for errors
+      std::cerr << "Edge: " << u << " <-> " << v << std::endl;
+      std::cerr << "Ports: u_port=" << u_port << ", v_port=" << v_port << std::endl;
+    
+      // Use std::exit from <cstdlib>
+      std::exit(EXIT_FAILURE); // EXIT_FAILURE is often preferred over magic numbers like 1 for error exits
+    }
     banned[u][u_port] = 1;
     banned[v][v_port] = 1;
   }
@@ -173,20 +216,20 @@ template <class T> void SpaceSimulation<T>::run() {
 
     // 计算延迟
 
-    for (int i = 0; i < GlobalConfig::num_observers; i++) {
-      auto src = GlobalConfig::latency_observers[i].first;
-      auto dst = GlobalConfig::latency_observers[i].second;
-      // TODO: auto [latency, success] = computeLatency(src, dst);
-      int latency = -1, success = 0;
-      if (success) {
-        failure_rates[i].add(0);
-      } else {
-        failure_rates[i].add(1);
-        latency = -1;
-      }
-      if (latency != -1)
-        latency_results[i].add(latency);
-    }
+  //   for (int i = 0; i < GlobalConfig::num_observers; i++) {
+  //     auto src = GlobalConfig::latency_observers[i].first;
+  //     auto dst = GlobalConfig::latency_observers[i].second;
+  //     // TODO: auto [latency, success] = computeLatency(src, dst);
+  //     int latency = -1, success = 0;
+  //     if (success) {
+  //       failure_rates[i].add(0);
+  //     } else {
+  //       failure_rates[i].add(1);
+  //       latency = -1;
+  //     }
+  //     if (latency != -1)
+  //       latency_results[i].add(latency);
+  //   }
   }
   // TODO: report();
 }
