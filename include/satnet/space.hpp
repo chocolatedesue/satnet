@@ -1,12 +1,12 @@
 #pragma once
 
+#include "satnet/base.hpp"
 #include "satnet/utils.hpp"
 #include <string>
 #include <vector>
 #include  <chrono>
 
-
-template <class T> class SpaceSimulation {
+template <DerivedFromBaseNode T> class SpaceSimulation {
 
 private:
 
@@ -41,7 +41,7 @@ private:
 
   std::string config_file_name;
 
-  std::vector<T> nodes;
+  std::vector<BaseNode*> nodes;
   std::vector<std::vector<int>> route_tables;
   std::vector<int> path_vis;
 
@@ -56,12 +56,14 @@ private:
   void load_sat_vel();
   void report ();
 
-  std::pair<double, bool> computeLatency(int src, int dst) ;
+// std::pair<double, bool> computeLatency(int src, int dst) ;
 
 public:
   SpaceSimulation(const std::string &config_file_name);
 
   void run();
+
+  ~SpaceSimulation() = default;
 };
 
 #include "space.tpp" // Include the template implementation file

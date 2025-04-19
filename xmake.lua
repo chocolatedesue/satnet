@@ -7,9 +7,9 @@ set_version("1.0.0")
 add_requires("libomp", {optional = true})
 -- add_requires("openmp")
 
-add_rules("mode.releasedbg")
+-- add_rules("mode.releasedbg")
 
-set_defaultmode("releasedbg")
+-- set_defaultmode("releasedbg")
 
 target("satnet")
     -- 设置目标类型为二进制可执行文件
@@ -17,7 +17,7 @@ target("satnet")
     set_kind("binary")
     
     
-    set_languages("cxx17")
+    set_languages("cxx20")
 
     set_toolset("cxx", "clang++-21") -- 设置编译器为 clang 21
     set_toolset("cc", "clang-21")   -- 设置 C 编译器为 clang 21
@@ -53,7 +53,7 @@ target("satnet-debug")
     -- 设置目标类型为二进制可执行文件
     set_kind("binary")
     add_rules("mode.debug")
-    set_languages("cxx17")
+    set_languages("cxx20")
 
     set_toolset("cxx", "clang++-21") -- 设置编译器为 clang 21
     set_toolset("cc", "clang-21")   -- 设置 C 编译器为 clang 21
@@ -81,4 +81,4 @@ target("satnet-debug")
     -- 添加链接标志
     add_ldflags("-fopenmp") -- 链接 OpenMP 和 libc++
 
-    set_default(true)
+    -- set_default(true)

@@ -6,6 +6,7 @@
 
 #include "satnet/base.hpp"
 #include "satnet/dijkstra.hpp"
+#include "satnet/domain_heuristic.hpp"
 #include "satnet/minhopcount.hpp"
 #include "satnet/space.hpp"
 
@@ -71,6 +72,9 @@ int main(int argc, char** argv) {
 
             case static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE):
                 runSimulation<MinHopCountPredNode>(configFileName);
+                break;
+            case static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE):
+                runSimulation<DomainHeuristicNode<10, 10>>(configFileName);
                 break;
             // Add other algorithm cases here
             default:

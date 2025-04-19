@@ -1,15 +1,15 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cmath> 
-#include <limits> 
 #include <array>
-#include <queue> 
+#include <cmath>
+#include <limits>
+#include <queue>
+#include <string>
+#include <vector>
 
-#include "satnet/base.hpp" 
-#include "utils.hpp"          
-#include "nlohmann/json.hpp"   
+#include "nlohmann/json.hpp"
+#include "satnet/base.hpp"
+#include "utils.hpp"
 
 using json = nlohmann::json;
 
@@ -18,54 +18,55 @@ using json = nlohmann::json;
  */
 class DijkstraNode : public BaseNode { // Or potentially public DisCoRouteNode
 private:
-
-
-    double getDist(int a, int b); // Calculate distance between nodes a and b
+  double getDist(int a, int b); // Calculate distance between nodes a and b
 
 protected:
-    std::vector<int> vis;   // Visited flags (size N)
-    std::vector<double> dist; // Distance array (size N)
-    // route_table is assumed inherited
+  std::vector<int> vis;     // Visited flags (size N)
+  std::vector<double> dist; // Distance array (size N)
+  // route_table is assumed inherited
 
-    double calcuDelay(int a, int b); // Calculate link delay between a and b
+  double calcuDelay(int a, int b); // Calculate link delay between a and b
 
 public:
-    DijkstraNode(int id);
-    virtual ~DijkstraNode() = default;
+  DijkstraNode(int id);
+  virtual ~DijkstraNode() = default;
 
-    virtual std::string getName() override;
-    virtual void compute() override; // Compute routes using standard Dijkstra
+  virtual std::string getName() override;
+  virtual void compute() override; // Compute routes using standard Dijkstra
 
+  
 };
-
 
 /**
  * @brief Dijkstra variant considering currently banned ports.
  */
 class DijkstraProbeNode : public DijkstraNode {
 protected:
-    // Compute routes avoiding specific ports
-    void computeWithBannedPorts(const std::vector<std::array<int, 5>>* banned_ptr); 
+  // Compute routes avoiding specific ports
+  void
+  computeWithBannedPorts(const std::vector<std::array<int, 5>> *banned_ptr);
 
 public:
-    DijkstraProbeNode(int id);
-    virtual ~DijkstraProbeNode() = default;
+  DijkstraProbeNode(int id);
+  virtual ~DijkstraProbeNode() = default;
 
-    virtual std::string getName() override;
-    // Compute routes using current banned ports (cur_banned)
-    virtual void compute() override; 
+  virtual std::string getName() override;
+  // Compute routes using current banned ports (cur_banned)
+  virtual void compute() override;
+
 };
-
 
 /**
  * @brief Dijkstra variant considering predicted future banned ports.
  */
-class DijkstraPredNode : public DijkstraProbeNode { 
+class DijkstraPredNode : public DijkstraProbeNode {
 public:
-    DijkstraPredNode(int id);
-    virtual ~DijkstraPredNode() = default;
+  DijkstraPredNode(int id);
+  virtual ~DijkstraPredNode() = default;
 
-    virtual std::string getName() override;
-    // Compute routes using future predicted banned ports (futr_banned)
-    virtual void compute() override; 
+  virtual std::string getName() override;
+  // Compute routes using future predicted banned ports (futr_banned)
+  virtual void compute() override;
+
+  
 };
