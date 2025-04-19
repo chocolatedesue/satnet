@@ -6,6 +6,7 @@
 
 #include "satnet/base.hpp"
 #include "satnet/dijkstra.hpp"
+#include "satnet/minhopcount.hpp"
 #include "satnet/space.hpp"
 
 // Define algorithm IDs as enum class for type safety
@@ -15,6 +16,7 @@ namespace satnet {
         COIN_FLIP_PRED_NODE = 2003,
         DIJKSTRA_PRED_NODE = 3003, 
         MIN_HOP_COUNT_NODE = 5001,
+        MIN_HOP_COUNT_PRED_NODE = 5002,
         DOMAIN_HEURISTIC_NODE = 5100
     };
 }
@@ -42,7 +44,8 @@ int main(int argc, char** argv) {
         {static_cast<int>(satnet::AlgorithmId::COIN_FLIP_PRED_NODE), "CoinFlipPredNode"},
         {static_cast<int>(satnet::AlgorithmId::DIJKSTRA_PRED_NODE), "DijkstraPredNode"},
         {static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_NODE), "MinHopCountNode"},
-        {static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE), "DomainHeuristicNode<10, 10>"}
+        {static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE), "DomainHeuristicNode<10, 10>"},
+        {static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE), "MinHopCountPredNode"},
     };
 
     try {
@@ -60,6 +63,14 @@ int main(int argc, char** argv) {
    
             case static_cast<int>(satnet::AlgorithmId::DIJKSTRA_PRED_NODE):
                 runSimulation<DijkstraPredNode>(configFileName);
+                break;
+
+            case static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_NODE):
+                runSimulation<MinHopCountNode>(configFileName);
+                break;
+
+            case static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE):
+                runSimulation<MinHopCountPredNode>(configFileName);
                 break;
             // Add other algorithm cases here
             default:

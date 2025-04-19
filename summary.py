@@ -356,7 +356,9 @@ def generate_latency_distribution(record: Dict[str, Any], algorithm_name: str) -
 
         # 保存到文件
         output_dir = "output/plot_data"
-        os.makedirs(output_dir, exist_ok=True,parents=True) # 确保目录存在
+        # os.makedirs(output_dir, exist_ok=True) # 确保目录存在
+        from pathlib import Path
+        Path(output_dir).mkdir(parents=True, exist_ok=True) # 确保目录存在
         # 清理算法名称，使其适合做文件名
         safe_algo_name = "".join(c if c.isalnum() else "_" for c in algorithm_name)
         output_path = os.path.join(output_dir, f"{safe_algo_name}_latency_cdf.csv")
@@ -407,7 +409,8 @@ def main():
         "DiffDomainBridge_8_3": "DomainBridge(8_3)", # 保持区分度
         "DisCoRouteBase": "DisCoRoute",
         "DijkstraPred": "DT-DVTR",
-        "MinHopCount": "FSA-LA",
+        "MinHopCount": "MinHopCount",
+        "MinHopCountPred": "FSA-LA",
         "LBP": "LBP",
         "DijkstraBase": "DijkstraBase",
         "CoinFlipPred": "CoinFlipPred", # 添加映射（如果需要友好名称）
@@ -423,7 +426,8 @@ def main():
     # 这个顺序会覆盖基于ID的排序，决定最终输出文件的行顺序
     algorithm_output_order = [
         "DijkstraPred",      # DT-DVTR
-        "MinHopCount",       # FSA-LA
+        "MinHopCount",       # MinHopCount
+        "MinHopCountPred",   # FSA-LA
         "DisCoRouteBase",    # DisCoRoute
         "LBP",               # LBP
         "DiffDomainBridge_10_3", # DomainBridge
