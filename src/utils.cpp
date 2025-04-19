@@ -121,16 +121,9 @@ double calcuDelay(int a, int b) {
 
   // 避免除以零
   if (GlobalConfig::prop_speed == 0) {
-    // 返回无穷大或抛出异常
-    // throw std::runtime_error("Propagation speed is zero in calcuDelay");
     return std::numeric_limits<double>::infinity();
   }
 
-  // 再次检查这个公式和单位是否正确
-  // delay = proc_delay (ms) + prop_delay_coef * dist_scaled / prop_speed * 1000
-  // 如果 getDist 返回 km*1000, prop_delay_coef 是 km/ms, prop_speed 是 km/ms
-  // 单位: ms + (km/ms) * (km*1000) / (km/ms) * 1000 = ms + km * 1000 * 1000 ?
-  // 单位似乎不匹配 请仔细核对公式和单位！
   return GlobalConfig::proc_delay + GlobalConfig::prop_delay_coef *
                                         dist_scaled / GlobalConfig::prop_speed *
                                         1000;

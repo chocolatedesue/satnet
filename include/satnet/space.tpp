@@ -1,15 +1,17 @@
 #pragma once
 
 // #include "omp.h"
-#include "space.hpp"
-#include "utils.hpp"
+// #include "space.hpp"
+// #include "utils.hpp"
 // Constructor definition
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <filesystem> // 需要 C++17
 #include <fstream>
 #include <iostream>
+
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -45,7 +47,7 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
   }
 
   isl_state_dir = config["isl_state_dir"];
-
+  sat_pos_dir = config["sat_position_dir"];
   sat_vel_dir = config["sat_velocity_dir"];
   report_dir = config["report_dir"].get<std::string>();
 
@@ -72,6 +74,14 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
   for (int i = 0; i < GlobalConfig::N; ++i) {
     nodes.push_back(T(i));
   }
+
+  config_name = config["name"];
+  algorithm_name = nodes[0].getName();
+
+  sprintf(report_filename, "report [%s] %s.txt", algorithm_name.c_str(),
+          algorithm_name.c_str());
+
+  path_vis = std::vector<int>(GlobalConfig::N);
 }
 
 template <class T> void SpaceSimulation<T>::load_sat_pos() {
@@ -157,7 +167,7 @@ template <class T> void SpaceSimulation<T>::load_futr_banned() {
 template <class T> void SpaceSimulation<T>::run() {
 
   cur_time = start_time;
-  run_start = clock();
+  run_start = std::chrono::steady_clock::now();
 
   for (; cur_time < start_time + duration; cur_time += step) {
     load_cur_banned();
@@ -212,7 +222,7 @@ template <class T> void SpaceSimulation<T>::run() {
 
     if (cur_time % refresh_period == 0) {
       std::cout << "Begin to report at time " << cur_time << std::endl;
-      // TODO report();
+      report();
     }
 
     // 计算延迟
@@ -220,10 +230,11 @@ template <class T> void SpaceSimulation<T>::run() {
     for (int i = 0; i < GlobalConfig::num_observers; i++) {
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
-      // TODO: auto [latency, success] = computeLatency(src, dst);
-      int latency = -1, success = 0;
+      auto [latency, success] = computeLatency(src, dst);
+      // int latency = -1, success = 0;
       if (success) {
         GlobalConfig::failure_rates[i].add(0);
+        GlobalConfig::latency_results[i].add(latency);
       } else {
         GlobalConfig::failure_rates[i].add(1);
         latency = -1;
@@ -232,5 +243,75 @@ template <class T> void SpaceSimulation<T>::run() {
         GlobalConfig::latency_results[i].add(latency);
     }
   }
-  // TODO: report();
+  report();
+}
+
+template <class T>
+std::pair<double, bool> SpaceSimulation<T>::computeLatency(int src, int dst) {
+  int cur = src;
+  double latency = 0;
+  bool success = true;
+  
+  if (path_timer >= 1e8) {
+    for (int i = 0; i < GlobalConfig::N; i++) {
+      path_vis[i] = 0;
+    }
+    path_timer = 0;
+  }
+  ++path_timer;
+  while (cur != dst) {
+    auto &route_table = route_tables[cur];
+    int next_hop = route_table[dst];
+    if (next_hop == 0 || GlobalConfig::cur_banned[cur][next_hop] ||
+        path_vis[cur] == path_timer) {
+      success = false;
+      break;
+    }
+    path_vis[cur] = path_timer;
+    int neigh = move(cur, next_hop);
+    double one_hop_latency = calcuDelay(cur, neigh);
+    latency += one_hop_latency;
+    cur = neigh;
+  }
+  //  向 log 文件里写入延迟
+  // if (success) {
+  //   std::cout << "Latency from " << src << " to " << dst << ": " << latency
+  //             << std::endl;
+  // } else {
+  //   std::cout << "No path from " << src << " to " << dst << std::endl;
+  // }
+  return std::make_pair(latency, success);
+}
+
+template <class T> void SpaceSimulation<T>::report() {
+  double past_time = cur_time - start_time + 1;
+  auto run_duration = (std::chrono::steady_clock::now() - run_start);
+  std::chrono::duration<double> rw_time = run_duration;
+  double eta =
+      rw_time.count() / past_time * std::max(duration - past_time, 0.0);
+  std::cerr << "Real-world time: " << rw_time.count() << std::endl;
+  std::cerr << "Simulation time: " << cur_time << std::endl;
+  std::cerr << "ETA: " << eta << std::endl;
+
+  auto open_path = report_dir + "/" + std::string(report_filename);
+  auto fout = fopen(open_path.c_str(), "w");
+  fprintf(fout, "name: %s\n", config_name.c_str());
+  fprintf(fout, "algorithm: %s\n", algorithm_name.c_str());
+  fprintf(fout, "node type: %s\n", typeid(T).name());
+  fprintf(fout, "simulation time: %d\n", cur_time);
+  fprintf(fout, "real-world time: %f\n", rw_time.count());
+  fprintf(fout, "estimated time of arrival: %f\n", eta);
+  fprintf(fout, "compute time: %f\n", compute_time_result.getResult());
+  fprintf(fout, "update entry: %f\n", update_entry_result.getResult());
+  fprintf(fout, "number of observers: %d\n", GlobalConfig::num_observers);
+  
+  for (int i = 0; i < GlobalConfig::num_observers; i++) {
+    auto src = GlobalConfig::latency_observers[i].first;
+    auto dst = GlobalConfig::latency_observers[i].second;
+    auto latency = GlobalConfig::latency_results[i].getResult();
+    auto failure_rate = GlobalConfig::failure_rates[i].getResult();
+    fprintf(fout, "route path [%d, %d]\n\tlatency: %f\n\tfailure rate: %f\n",
+            src, dst, latency, failure_rate);
+  }
+  fclose(fout);
 }
