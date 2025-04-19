@@ -14,17 +14,17 @@
 #include <fstream>
 #include <iostream>
 
+#include <concepts>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#include <concepts>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-template <DerivedFromBaseNode T> 
+template <DerivedFromBaseNode T>
 SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
     : config_file_name(config_path) {
   GlobalConfig::loadConfig(config_path);
@@ -75,11 +75,11 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
       GlobalConfig::N, std::vector<int>(GlobalConfig::N));
 
   for (int i = 0; i < GlobalConfig::N; ++i) {
-  nodes.push_back(new T(i));
+    nodes.push_back(new T(i));
   }
 
   config_name = config["name"];
-  algorithm_name = nodes[0] -> getName();
+  algorithm_name = nodes[0]->getName();
 
   sprintf(report_filename, "report [%s] %s.txt", algorithm_name.c_str(),
           algorithm_name.c_str());
@@ -87,7 +87,7 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
   path_vis = std::vector<int>(GlobalConfig::N);
 }
 
-template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_sat_pos() {
+template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_sat_pos() {
   auto ifs = std::ifstream(sat_pos_dir + "/" + std::to_string(cur_time) +
                            std::string(".csv"));
   for (int i = 0; i < GlobalConfig::N; i++) {
@@ -96,7 +96,7 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_sat_pos() {
   }
 }
 
-template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_sat_lla() {
+template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_sat_lla() {
   auto ifs = std::ifstream(sat_lla_dir + "/" + std::to_string(cur_time) +
                            std::string(".csv"));
   for (int i = 0; i < GlobalConfig::N; i++) {
@@ -105,7 +105,7 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_sat_lla() {
   }
 }
 
-template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_sat_vel() {
+template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_sat_vel() {
   auto ifs = std::ifstream(sat_vel_dir + "/" + std::to_string(cur_time) +
                            std::string(".csv"));
   for (int i = 0; i < GlobalConfig::N; i++) {
@@ -124,7 +124,7 @@ void clearIslState(std::vector<std::array<int, 5>> &banned) {
   }
 }
 
-template <DerivedFromBaseNode T> 
+template <DerivedFromBaseNode T>
 void SpaceSimulation<T>::readIslStateFlie(
     int time, std::vector<std::array<int, 5>> &banned) {
   std::string isl_state_filename =
@@ -152,12 +152,12 @@ void SpaceSimulation<T>::readIslStateFlie(
   }
 }
 
-template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_cur_banned() {
+template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_cur_banned() {
   clearIslState(GlobalConfig::cur_banned);
   readIslStateFlie(cur_time, GlobalConfig::cur_banned);
 }
 
-template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_futr_banned() {
+template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_futr_banned() {
   clearIslState(GlobalConfig::futr_banned);
   for (int futr_time = cur_time; futr_time < cur_time + update_period &&
                                  futr_time < start_time + duration;
@@ -167,7 +167,7 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::load_futr_banned() {
 }
 
 // run method definition
-template <DerivedFromBaseNode T>  void SpaceSimulation<T>::run() {
+template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
 
   cur_time = start_time;
   run_start = std::chrono::steady_clock::now();
@@ -195,7 +195,7 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::run() {
         auto elapsed_ms = elapsed_s * 1000;
         total_compute_time += elapsed_ms;
 
-        auto &new_table = node -> getRouteTable();
+        auto &new_table = node->getRouteTable();
         int diff = 0;
         for (int j = 0; j < GlobalConfig::N; j++) {
           if (cur_table[j] != new_table[j]) {
@@ -249,12 +249,13 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::run() {
   report();
 }
 
-// template <DerivedFromBaseNode T> 
-// std::pair<double, bool> SpaceSimulation<T>::computeLatency(int src, int dst) {
+// template <DerivedFromBaseNode T>
+// std::pair<double, bool> SpaceSimulation<T>::computeLatency(int src, int dst)
+// {
 //   int cur = src;
 //   double latency = 0;
 //   bool success = true;
-  
+
 //   if (path_timer >= 1e8) {
 //     for (int i = 0; i < GlobalConfig::N; i++) {
 //       path_vis[i] = 0;
@@ -278,7 +279,8 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::run() {
 //   }
 //   //  向 log 文件里写入延迟
 //   // if (success) {
-//   //   std::cout << "Latency from " << src << " to " << dst << ": " << latency
+//   //   std::cout << "Latency from " << src << " to " << dst << ": " <<
+//   latency
 //   //             << std::endl;
 //   // } else {
 //   //   std::cout << "No path from " << src << " to " << dst << std::endl;
@@ -286,7 +288,7 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::run() {
 //   return std::make_pair(latency, success);
 // }
 
-template <DerivedFromBaseNode T>  void SpaceSimulation<T>::report() {
+template <DerivedFromBaseNode T> void SpaceSimulation<T>::report() {
   double past_time = cur_time - start_time + 1;
   auto run_duration = (std::chrono::steady_clock::now() - run_start);
   std::chrono::duration<double> rw_time = run_duration;
@@ -307,7 +309,7 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::report() {
   fprintf(fout, "compute time: %f\n", compute_time_result.getResult());
   fprintf(fout, "update entry: %f\n", update_entry_result.getResult());
   fprintf(fout, "number of observers: %d\n", GlobalConfig::num_observers);
-  
+
   for (int i = 0; i < GlobalConfig::num_observers; i++) {
     auto src = GlobalConfig::latency_observers[i].first;
     auto dst = GlobalConfig::latency_observers[i].second;
@@ -319,9 +321,7 @@ template <DerivedFromBaseNode T>  void SpaceSimulation<T>::report() {
   fclose(fout);
 }
 
-
-template<DerivedFromBaseNode T>
-~SpaceSimulation<T>::~SpaceSimulation() {
+template <DerivedFromBaseNode T> SpaceSimulation<T>::~SpaceSimulation() {
   for (auto node : nodes) {
     delete node;
   }

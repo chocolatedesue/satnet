@@ -63,7 +63,7 @@ public:
 
   void run();
 
-  ~SpaceSimulation() = default;
+~SpaceSimulation();
 };
 
 #include "space.tpp" // Include the template implementation file

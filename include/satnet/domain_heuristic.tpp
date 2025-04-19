@@ -14,13 +14,12 @@
 
 template <int Kp, int Kn>
 DomainHeuristicNode<Kp, Kn>::DomainHeuristicNode(int id)
-    : BaseNode(id) // Initialize base class
+    : BaseNode(id), vis(GlobalConfig::N, 0) // Initialize base class
 {}
 
 template <int Kp, int Kn>
-std::pair<double, bool>
-DomainHeuristicNode<Kp, Kn>::CalcE2ePath(int src, int dst,
-                                         const std::vector<std::vector<int>> &route_tables) {
+std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
+    int src, int dst, const std::vector<std::vector<int>> &route_tables) {
   return std::pair<double, bool>(-1, false);
   // // Assumptions: check_lla_status() and calcuDelay(a, b) are globally
   // available or static in another accessible class.
@@ -94,7 +93,7 @@ int DomainHeuristicNode<Kp, Kn>::calculateDomainId(int satelliteId) {
 
 template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
 
-  auto &banned =
+  const auto &banned =
       GlobalConfig::futr_banned; // Assuming pointer access is correct
 
   // Reset state for this computation run
@@ -105,10 +104,7 @@ template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
 
   std::queue<int> q;
 
-  vis[id] =
-      id; // Mark start node as visited (using 'id' as marker, or maybe 0?)
-  // route_table[id] = id; // Indicate start node has no predecessor from within
-  // the domain BFS traversal? Or -1?
+  // vis[id] = ;
   q.push(id);
 
   while (!q.empty()) {

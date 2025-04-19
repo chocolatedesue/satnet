@@ -33,7 +33,7 @@ public:
   // --- Member Functions ---
   std::string getName() override;
 
-  static std::pair<double, bool> CalcE2ePath(int src, int dst,
+  static std::pair<double, bool> calcE2ePath(int src, int dst,
     const std::vector<std::vector<int>> &route_tables) ;
 
 };

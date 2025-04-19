@@ -8,10 +8,10 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/linux/x86_64/release/satnet-debug",
+            "program": "${workspaceFolder}/build/linux/x86_64/debug/satnet-debug",
             "args": [
                 "${workspaceFolder}/configs/ng-full-starlink_group5-Jan.json",
-                "3003"
+                "5100"
             ],
      
             "stopAtEntry": false,
