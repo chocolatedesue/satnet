@@ -5,7 +5,8 @@
 #include "base.hpp"
 #include "satnet/domain_heuristic.hpp"
 #include "satnet/utils.hpp"
-#include <cmath>  // For std::floor
+#include <cmath> // For std::floor
+#include <cstdio>
 #include <limits> // Potentially for checking invalid IDs or distances
 #include <map>
 #include <stdexcept> // For potential error handling (e.g., invalid config)
@@ -50,32 +51,21 @@ template <int Kp, int Kn>
 std::vector<std::vector<std::vector<short>>>
 DomainHeuristicNode<Kp, Kn>::createBorderNodes() {
 
-  if (GlobalConfig::N <= 0) {
-    // Handle cases where N is non-positive if necessary
-    // Return an empty structure appropriate for Kp, Kn
-    return std::vector<std::vector<std::vector<short>>>(
-        std::max({Kp, Kn, 1}), // Ensure at least size 1 if Kp/Kn are 0?
-        std::vector<std::vector<short>>(5, std::vector<short>()));
-  }
-
   // 1. Create the vector structure
   // Use std::max with an initializer list for clarity if Kp or Kn could be 0
-  size_t domain_max_side_length =
-      static_cast<size_t>(std::max({Kp, Kn, 1})); // Ensure size >= 1 maybe?
+  size_t domain_max_side_length = static_cast<size_t>(
+      std::max({Kp * Kn + 1, 1})); // Ensure size >= 1 maybe?
   std::vector<std::vector<std::vector<short>>> nodes(
       domain_max_side_length,
       std::vector<std::vector<short>>(5, std::vector<short>()));
 
+  printf("Creating border nodes...\n");
+  printf("Kp=%d, Kn=%d, domain_max_side_length=%zu\n", Kp, Kn,
+         domain_max_side_length);
+
   // 2. Perform initialization logic
   for (int i = 0; i < GlobalConfig::N; ++i) {
     int cur_dmid = calculateDomainId(i);
-
-    if (cur_dmid < 0 || static_cast<size_t>(cur_dmid) >= nodes.size()) {
-      // Handle error: Invalid domain ID calculated
-      // fprintf(stderr, "Warning: Invalid domain ID %d for sat %d\n", cur_dmid,
-      // i);
-      continue;
-    }
 
     for (int j = 1; j < 5; ++j) { // Directions 1-4
       int nxt = move(i, j);       // Assumes move is accessible
@@ -86,12 +76,9 @@ DomainHeuristicNode<Kp, Kn>::createBorderNodes() {
       // Optional: Check nxt_dmid validity too
 
       if (nxt_dmid != cur_dmid) {
-        // Check bounds again just in case, though j is 1-4
-        if (static_cast<size_t>(j) < nodes[cur_dmid].size()) {
-          nodes[cur_dmid][j].push_back(static_cast<short>(i));
-        } else {
-          // Handle error: Invalid direction index j? Should not happen here.
-        }
+        // printf("Adding border node: cur_dmid=%d, nxt_dmid=%d, i=%d, j=%d\n",
+        //        cur_dmid, nxt_dmid, i, j);
+        nodes[cur_dmid][j].push_back(static_cast<short>(i));
       }
     }
   }
@@ -171,10 +158,10 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
 
   // 垂直方向评分
   if (down_hop_cnt > 0) {
-    direction_scores[1] = prefer_down ? 80.0 : 40.0; // 下
+    direction_scores[3] = prefer_down ? 80.0 : 40.0; // 下
   }
   if (up_hop_cnt > 0) {
-    direction_scores[3] = !prefer_down ? 80.0 : 40.0; // 上
+    direction_scores[1] = !prefer_down ? 80.0 : 40.0; // 上
   }
 
   // 转换成vector并按分数排序
@@ -235,6 +222,12 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
   const auto [I_src, J_src] = calcDomainCoords(src);
   const auto [I_dst, J_dst] = calcDomainCoords(dst);
 
+  // Debugging output
+
+  // printf("Start to calc Path: src=%d, I_src=%d, J_src=%d --> dst=%d, "
+  //        "I_dst=%d, J_dst=%d\n",
+  //        src, I_src, J_src, dst, I_dst, J_dst);
+
   if (I_src == I_dst && J_src == J_dst) {
     return calcE2ePathWithinDomain(src, dst, route_tables);
   } else {
@@ -273,8 +266,10 @@ DomainHeuristicNode<Kp, Kn>::calcDomainCoords(int satelliteId) {
   int p_s = satelliteId / GlobalConfig::Q;
 
   // Use static_cast for clarity. Ensure P isn't zero.
-  int I_s = static_cast<int>(std::floor(static_cast<double>(p_s) / Kp));
-  int J_s = static_cast<int>(std::floor(static_cast<double>(n_s) / Kn));
+  int I_s = static_cast<int>(
+      std::floor(static_cast<double>(p_s) / (GlobalConfig::P / Kp)));
+  int J_s = static_cast<int>(
+      std::floor(static_cast<double>(n_s) / (GlobalConfig::Q / Kn)));
 
   return std::make_pair(I_s, J_s);
 }

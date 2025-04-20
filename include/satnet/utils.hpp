@@ -124,3 +124,5 @@ namespace GlobalConfig {
 //     }
 // }
 
+
+extern const int MAX_RECURSE_CNT;

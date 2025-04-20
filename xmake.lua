@@ -5,6 +5,7 @@ set_project("satnet")
 set_version("1.0.0")
 -- add_rules("mode.debug")
 add_requires("libomp", {optional = true})
+add_requires("spdlog")
 -- add_requires("openmp")
 
 -- add_rules("mode.releasedbg")

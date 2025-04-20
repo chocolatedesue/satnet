@@ -32,19 +32,6 @@
                 }
             ]
         },
-        
-        {
-            "type": "xmake",
-            "request": "launch",
-            "name": "Debug XMake target",
-            "target": "satnet",
-            "cwd": "${workspaceFolder}",
-            "stopAtEntry": false,
-            "args" : [
-                "configs/ng-full-starlink_group5-Jan.json",
-                "1000"
-            ]
-            
-        }
+      
     ]
 }

@@ -193,3 +193,5 @@ int is_forwarder(int u) {
 
   return banned_cnt > 1;
 }
+
+const int MAX_RECURSE_CNT = 1e6;
