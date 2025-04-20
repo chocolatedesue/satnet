@@ -7,11 +7,11 @@
 #include <string>
 #include <vector>
 
-#include "nlohmann/json.hpp"
+// #include "json.hpp"
 #include "satnet/base.hpp"
 #include "utils.hpp"
 
-using json = nlohmann::json;
+// using json = nlohmann::json;
 
 /**
  * @brief Base class for Dijkstra routing nodes.

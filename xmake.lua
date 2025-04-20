@@ -4,8 +4,9 @@
 set_project("satnet")
 set_version("1.0.0")
 -- add_rules("mode.debug")
-add_requires("libomp", {optional = true})
+add_requires("libomp")
 add_requires("spdlog")
+add_requires("nlohmann_json")
 -- add_requires("openmp")
 
 -- add_rules("mode.releasedbg")
@@ -29,6 +30,9 @@ target("satnet")
     -- add_files("src/**.cpp")
     -- 如果确定只有 src 根目录下的 cpp 文件，则 "src/*.cpp" 即可
     add_files("src/*.cpp")
+    add_packages("libomp")
+    add_packages("spdlog")
+    add_packages("nlohmann_json")
 
     -- 添加 'include' 目录到头文件搜索路径
     -- 编译器会在此目录下查找 #include 指令引用的头文件
@@ -58,6 +62,10 @@ target("satnet-debug")
 
     set_toolset("cxx", "clang++-21") -- 设置编译器为 clang 21
     set_toolset("cc", "clang-21")   -- 设置 C 编译器为 clang 21
+
+    add_packages("libomp")
+    add_packages("spdlog")
+    add_packages("nlohmann_json")
 
     -- 添加 'src' 目录下的所有 .cpp 文件作为源文件
     -- 如果 'src' 目录下还有子目录，且其中包含需要编译的 .cpp 文件，

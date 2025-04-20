@@ -11,6 +11,14 @@
 
 #include "nlohmann/json.hpp"
 
+// #include "spdlog.h"
+// #include "sinks/stdout_color_sinks.h"
+// #include "sinks/basic_file_sink.h"
+#include <memory>
+#include <vector>
+#include <iostream> // For error reporting during setup
+
+
 using json = nlohmann::json;
 
 // --- 全局配置 (定义) ---
