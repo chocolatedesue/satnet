@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
         {static_cast<int>(satnet::AlgorithmId::COIN_FLIP_PRED_NODE), "CoinFlipPredNode"},
         {static_cast<int>(satnet::AlgorithmId::DIJKSTRA_PRED_NODE), "DijkstraPredNode"},
         {static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_NODE), "MinHopCountNode"},
-        {static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE), "DomainHeuristicNode<10, 10>"},
+        {static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE), "DomainHeuristicNode<7, 10>"},
         {static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE), "MinHopCountPredNode"},
     };
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
                 runSimulation<MinHopCountPredNode>(configFileName);
                 break;
             case static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE):
-                runSimulation<DomainHeuristicNode<10, 10>>(configFileName);
+                runSimulation<DomainHeuristicNode<7, 10>>(configFileName);
                 break;
             // Add other algorithm cases here
             default:

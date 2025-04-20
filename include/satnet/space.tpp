@@ -74,6 +74,9 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
   route_tables = std::vector<std::vector<int>>(
       GlobalConfig::N, std::vector<int>(GlobalConfig::N));
 
+  // backup_route_tables = std::vector<std::vector<short>>(
+      // GlobalConfig::N, std::vector<short>(GlobalConfig::N));
+
   for (int i = 0; i < GlobalConfig::N; ++i) {
     nodes.push_back(new T(i));
   }
@@ -200,6 +203,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
         for (int j = 0; j < GlobalConfig::N; j++) {
           if (cur_table[j] != new_table[j]) {
             cur_table[j] = new_table[j];
+            // backup_route_tables[i][j] = new_table[j];
             diff++;
           }
         }
@@ -228,7 +232,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       report();
     }
 
-    // 计算延迟
+    
 
     for (int i = 0; i < GlobalConfig::num_observers; i++) {
       auto src = GlobalConfig::latency_observers[i].first;

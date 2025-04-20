@@ -64,7 +64,6 @@ void loadConfig(std::string config_path) {
       std::vector<Average>(GlobalConfig::num_observers);
   GlobalConfig::failure_rates =
       std::vector<Average>(GlobalConfig::num_observers);
-
 }
 
 void loadObserverConfig(std::string observer_config_path) {
@@ -155,7 +154,6 @@ int getPort(int u, int v, int &u_port, int &v_port) {
     */
   }
   return u_port != 0 && v_port != 0;
-
 }
 
 int move(int u, int dir) {
@@ -182,6 +180,16 @@ int move(int u, int dir) {
     }
   } else {
     // do nothing
+    return -1;
   }
   return x * Q + y;
+}
+
+int is_forwarder(int u) {
+  int banned_cnt = 0;
+  for (int i = 1; i < 5; i++) {
+    banned_cnt += GlobalConfig::cur_banned[u][i];
+  }
+
+  return banned_cnt > 1;
 }

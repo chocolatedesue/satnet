@@ -43,6 +43,7 @@ private:
 
   std::vector<BaseNode*> nodes;
   std::vector<std::vector<int>> route_tables;
+  // static std::vector<std::vector<short>> backup_route_tables;
   std::vector<int> path_vis;
 
 

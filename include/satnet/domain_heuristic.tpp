@@ -12,65 +12,269 @@
 // --- Constructor Definition ---
 #include <concepts>
 
+//  border_nodes(            // Initialize the 3D vector border_nodes
+//   std::max(Kp, Kn),    // Dimension 1 size = max(Kp, Kn)
+//   std::vector<std::vector<short>>( // The value for the outer vector (a
+//                                    // 2D vector)
+//       5,                           // Dimension 2 size = 5
+//       std::vector<short>()         // The value for the middle vector:
+//                                    // A default-constructed (empty)
+//                                    // std::vector<short>
+//       ))
+
 template <int Kp, int Kn>
 DomainHeuristicNode<Kp, Kn>::DomainHeuristicNode(int id)
-    : BaseNode(id), vis(GlobalConfig::N, 0) // Initialize base class
-{}
+    : BaseNode(id),           // Initialize base class
+      vis(GlobalConfig::N, 0) // Initialize vis (keeping previous logic)
+{
+
+  if (GlobalConfig::Q <= 0 || GlobalConfig::P <= 0) {
+    throw std::runtime_error(
+        "GlobalConfig::Q and GlobalConfig::P must be positive.");
+  }
+
+  if (Kp <= 0 || Kn <= 0) {
+    throw std::runtime_error("Kp and Kn must be positive.");
+  }
+
+  if (GlobalConfig::P % Kp != 0) {
+    throw std::runtime_error("GlobalConfig::P must be divisible by Kp.");
+  }
+
+  if (GlobalConfig::Q % Kn != 0) {
+    throw std::runtime_error("GlobalConfig::Q must be divisible by Kn.");
+  }
+}
+
+template <int Kp, int Kn>
+std::vector<std::vector<std::vector<short>>>
+DomainHeuristicNode<Kp, Kn>::createBorderNodes() {
+
+  if (GlobalConfig::N <= 0) {
+    // Handle cases where N is non-positive if necessary
+    // Return an empty structure appropriate for Kp, Kn
+    return std::vector<std::vector<std::vector<short>>>(
+        std::max({Kp, Kn, 1}), // Ensure at least size 1 if Kp/Kn are 0?
+        std::vector<std::vector<short>>(5, std::vector<short>()));
+  }
+
+  // 1. Create the vector structure
+  // Use std::max with an initializer list for clarity if Kp or Kn could be 0
+  size_t domain_max_side_length =
+      static_cast<size_t>(std::max({Kp, Kn, 1})); // Ensure size >= 1 maybe?
+  std::vector<std::vector<std::vector<short>>> nodes(
+      domain_max_side_length,
+      std::vector<std::vector<short>>(5, std::vector<short>()));
+
+  // 2. Perform initialization logic
+  for (int i = 0; i < GlobalConfig::N; ++i) {
+    int cur_dmid = calculateDomainId(i);
+
+    if (cur_dmid < 0 || static_cast<size_t>(cur_dmid) >= nodes.size()) {
+      // Handle error: Invalid domain ID calculated
+      // fprintf(stderr, "Warning: Invalid domain ID %d for sat %d\n", cur_dmid,
+      // i);
+      continue;
+    }
+
+    for (int j = 1; j < 5; ++j) { // Directions 1-4
+      int nxt = move(i, j);       // Assumes move is accessible
+      if (nxt == -1)
+        continue;
+
+      int nxt_dmid = calculateDomainId(nxt);
+      // Optional: Check nxt_dmid validity too
+
+      if (nxt_dmid != cur_dmid) {
+        // Check bounds again just in case, though j is 1-4
+        if (static_cast<size_t>(j) < nodes[cur_dmid].size()) {
+          nodes[cur_dmid][j].push_back(static_cast<short>(i));
+        } else {
+          // Handle error: Invalid direction index j? Should not happen here.
+        }
+      }
+    }
+  }
+  // 3. Return the initialized vector
+  return nodes;
+}
+
+// 域内路由辅助函数
+template <int Kp, int Kn>
+std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
+    int src, int dst, const std::vector<std::vector<int>> &route_tables) {
+  int val = 0;
+  int cur = src;
+  while (cur != dst) {
+    int nxt_dir = route_tables[cur][dst];
+    if (!nxt_dir) {
+      return std::make_pair(-1, false);
+    }
+    int nxt = move(cur, nxt_dir);
+    if (nxt == -1) {
+      return std::pair<double, bool>(-1, false);
+    }
+    val += calcuDelay(cur, nxt);
+    cur = nxt;
+  }
+  return std::pair<double, bool>(val, true);
+}
+
+template <int Kp, int Kn>
+std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
+    int cur, int dst, int pre_dir, std::vector<bool> &visited, double val,
+    bool prefer_right, bool prefer_down, int target_I, int target_J,
+    const std::vector<std::vector<int>> &route_tables) {
+
+  const auto &banned = GlobalConfig::futr_banned;
+  // 递归基本情况
+  if (cur == dst) {
+    return std::make_pair(val, true);
+  }
+
+  // 标记当前节点为已访问
+  visited[cur] = true;
+
+  // 检查当前节点是否已在目标域中
+  const auto [cur_I, cur_J] = calcDomainCoords(cur);
+  if (cur_I == target_I && cur_J == target_J) {
+    // 当前节点已在目标域中，使用域内路由
+    std::pair<double, bool> domain_result =
+        calcE2ePathWithinDomain(cur, dst, route_tables);
+
+    if (domain_result.second) {
+      return std::make_pair(val + domain_result.first, true);
+    } else {
+      visited[cur] = false; // 回溯
+      return std::make_pair(-1, false);
+    }
+  }
+
+  // 计算水平和垂直方向上的跳数
+  int r_hop_cnt = (target_I - cur_I + Kp) % Kp;    // 右跳数
+  int l_hop_cnt = (cur_I - target_I + Kp) % Kp;    // 左跳数
+  int down_hop_cnt = (target_J - cur_J + Kn) % Kn; // 下跳数
+  int up_hop_cnt = (cur_J - target_J + Kn) % Kn;   // 上跳数
+
+  // 创建方向优先级数组，根据prefer_right和prefer_down设置顺序
+  std::vector<std::pair<int, int>> directions; // pair<方向, 跳数>
+
+  // 计算每个方向的启发式评分
+  std::map<int, double> direction_scores;
+
+  if (r_hop_cnt > 0) {
+    direction_scores[2] = prefer_right ? 100.0 : 50.0; // 右
+  }
+  if (l_hop_cnt > 0) {
+    direction_scores[4] = !prefer_right ? 100.0 : 50.0; // 左
+  }
+
+  // 垂直方向评分
+  if (down_hop_cnt > 0) {
+    direction_scores[1] = prefer_down ? 80.0 : 40.0; // 下
+  }
+  if (up_hop_cnt > 0) {
+    direction_scores[3] = !prefer_down ? 80.0 : 40.0; // 上
+  }
+
+  // 转换成vector并按分数排序
+  std::vector<std::pair<int, double>> sorted_directions;
+  for (const auto &[dir, score] : direction_scores) {
+    sorted_directions.push_back({dir, score});
+  }
+
+  std::sort(sorted_directions.begin(), sorted_directions.end(),
+            [](const auto &a, const auto &b) { return a.second > b.second; });
+
+  // 尝试每个方向
+  for (const auto &[dir, score] : sorted_directions) {
+    // 如果存在边界节点，尝试路由
+    const auto &border_nodes = getBorderNodes();
+    for (auto nxt : border_nodes[cur_I][dir]) {
+      // 检查是否有路由、是否被禁用、是否已访问
+      if (!route_tables[cur][nxt] || banned[nxt][dir] == 1 || visited[nxt]) {
+        continue;
+      }
+
+      // 计算到边界节点的路径值
+      const auto [part_val, success] =
+          calcE2ePathWithinDomain(cur, nxt, route_tables);
+      if (!success) {
+        continue;
+      }
+
+      int nxt_nxt = move(nxt, dir);
+
+      if (nxt_nxt == -1 || visited[nxt_nxt]) {
+        continue;
+      }
+
+      const auto [final_val, path_found] = findPathRecursive(
+          nxt_nxt, dst, dir, visited, val + part_val + calcuDelay(nxt, nxt_nxt),
+          prefer_right, prefer_down, target_I, target_J, route_tables);
+
+      // 如果找到路径，返回结果
+      if (path_found) {
+        return std::make_pair(final_val, true);
+      }
+    }
+  }
+
+  // 回溯：标记当前节点为未访问
+  visited[cur] = false;
+
+  // 所有方向都失败，返回失败结果
+  return std::make_pair(-1, false);
+}
 
 template <int Kp, int Kn>
 std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
     int src, int dst, const std::vector<std::vector<int>> &route_tables) {
+
+  // return std::pair<double,bool>(-1,false);
+  const auto [I_src, J_src] = calcDomainCoords(src);
+  const auto [I_dst, J_dst] = calcDomainCoords(dst);
+
+  if (I_src == I_dst && J_src == J_dst) {
+    return calcE2ePathWithinDomain(src, dst, route_tables);
+  } else {
+
+    // I_src = src / GlobalConfig::Q, J_src = src % GlobalConfig::Q;
+    // I_dst = dst / GlobalConfig::Q, J_dst = dst % GlobalConfig::Q;
+
+    // printf("Start finding path from %d to %d\n", src, dst);
+    std::vector<bool> visited(GlobalConfig::N, false);
+
+    // 计算正确的跨域启发信息
+    int r_hop_cnt = (I_dst - I_src + Kp) % Kp;
+    int l_hop_cnt = (I_src - I_dst + Kp) % Kp; // 修正左跳计算
+    int up_hop_cnt = (J_src - J_dst + Kn) % Kn;
+    int down_hop_cnt = (J_dst - J_src + Kn) % Kn;
+
+    // 确定优先方向
+    bool prefer_right = (r_hop_cnt <= l_hop_cnt);
+    bool prefer_down = (down_hop_cnt <= up_hop_cnt);
+
+    // 调用递归函数
+    return findPathRecursive(src, dst, -1, visited, 0, prefer_right,
+                             prefer_down, I_dst, J_dst, route_tables);
+  }
+  printf(
+      "Fail to find path from %d to %d in DomainHeuristicNode::calcE2ePath\n",
+      src, dst);
   return std::pair<double, bool>(-1, false);
-  // // Assumptions: check_lla_status() and calcuDelay(a, b) are globally
-  // available or static in another accessible class.
-  // // Ensure route_table access is within bounds.
-  // int is_vertical = check_lla_status(); // Assuming it exists
-  // // (Note: is_vertical is calculated but not used in the provided snippet)
-
-  // auto [I_src, J_src] = calcDomainCoords(src);
-  // auto [I_dst, J_dst] = calcDomainCoords(dst);
-
-  // if (I_src == I_dst && J_src == J_dst) {
-  //     // Path calculation within the same domain
-  //     int val = 0;
-  //     int cur = src;
-  //     while (cur != dst) {
-  //         int nxt = nodes[cur].route_table[dst]; // Assuming route_table is
-  //         accessible and valid val += calcuDelay(cur, nxt); // Assuming it
-  //         exists and handles nodes correctly cur = nxt;
-  //     }
-
-  //     return val ;
-  //     // TODO: What should be done with 'val'? Return it? Log it?
-  //     // Function currently returns void.
-  //     // if (cur == dst) { /* Path found, maybe return val */ }
-  //     // else { /* Path not found or error */ }
-  // } else {
-  //     // Nodes are in different domains, this function only handles
-  //     intra-domain.
-  //     // Maybe log this or return an error code/special value if the function
-  //     returned something.
-  // }
-  // return;
 }
 
 template <int Kp, int Kn>
 std::pair<int, int>
 DomainHeuristicNode<Kp, Kn>::calcDomainCoords(int satelliteId) {
-  // Assumption: GlobalConfig::Q and GlobalConfig::P are valid positive
-  // integers.
-  if (GlobalConfig::Q <= 0 || GlobalConfig::P <= 0) {
-    throw std::runtime_error(
-        "GlobalConfig::Q and GlobalConfig::P must be positive.");
-  }
+
   int n_s = satelliteId % GlobalConfig::Q;
   int p_s = satelliteId / GlobalConfig::Q;
 
   // Use static_cast for clarity. Ensure P isn't zero.
-  int I_s = static_cast<int>(
-      std::floor(static_cast<double>(p_s) * Kp / GlobalConfig::P));
-  int J_s = static_cast<int>(
-      std::floor(static_cast<double>(n_s) * Kn / GlobalConfig::P));
+  int I_s = static_cast<int>(std::floor(static_cast<double>(p_s) / Kp));
+  int J_s = static_cast<int>(std::floor(static_cast<double>(n_s) / Kn));
 
   return std::make_pair(I_s, J_s);
 }
@@ -88,7 +292,7 @@ int DomainHeuristicNode<Kp, Kn>::calculateDomainId(int satelliteId) {
   auto [I_s, J_s] = calcDomainCoords(satelliteId);
   // Potential issue if Kp or Kn is 0, resulting in non-unique IDs or division
   // by zero downstream.
-  return J_s * Kp + I_s;
+  return I_s * Kn + J_s;
 }
 
 template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {

@@ -50,6 +50,8 @@ int getPort(int u, int v, int &u_port, int &v_port);
 // int is_nearby(int a, int b);
 int move(int u, int dir);
 
+int is_forwarder(int u);
+
 class Average {
 private:
   double sum, mx;
