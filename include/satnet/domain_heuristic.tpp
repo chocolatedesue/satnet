@@ -12,6 +12,7 @@
 #include <stdexcept> // For potential error handling (e.g., invalid config)
 // --- Constructor Definition ---
 #include <concepts>
+#include <spdlog/spdlog.h>
 
 //  border_nodes(            // Initialize the 3D vector border_nodes
 //   std::max(Kp, Kn),    // Dimension 1 size = max(Kp, Kn)
@@ -59,9 +60,15 @@ DomainHeuristicNode<Kp, Kn>::createBorderNodes() {
       domain_max_side_length,
       std::vector<std::vector<short>>(5, std::vector<short>()));
 
-  printf("Creating border nodes...\n");
-  printf("Kp=%d, Kn=%d, domain_max_side_length=%zu\n", Kp, Kn,
-         domain_max_side_length);
+  auto logger = spdlog::get(global_logger_name);
+
+  // printf("Creating border nodes...\n");
+  // printf("Kp=%d, Kn=%d, domain_max_side_length=%zu\n", Kp, Kn,
+  //        domain_max_side_length);
+
+  logger->info("Creating border nodes...");
+  logger->info("Kp={}, Kn={}, domain_max_side_length={}", Kp, Kn,
+               domain_max_side_length);
 
   // 2. Perform initialization logic
   for (int i = 0; i < GlobalConfig::N; ++i) {
@@ -111,8 +118,15 @@ template <int Kp, int Kn>
 std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
     int cur, int dst, int pre_dir, std::vector<bool> &visited, double val,
     bool prefer_right, bool prefer_down, int target_I, int target_J,
-    const std::vector<std::vector<int>> &route_tables) {
+    const std::vector<std::vector<int>> &route_tables, int recurse_cnt) {
 
+  auto logger = spdlog::get(global_logger_name);
+  if (recurse_cnt > MAX_RECURSE_CNT) {
+    logger->warn("Recursion limit reached: cur={}, dst={}, pre_dir={}, "
+                 "recurse_cnt={}",
+                 cur, dst, pre_dir, recurse_cnt);
+    return std::make_pair(-1, false);
+  }
   const auto &banned = GlobalConfig::futr_banned;
   // 递归基本情况
   if (cur == dst) {
@@ -198,7 +212,8 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
 
       const auto [final_val, path_found] = findPathRecursive(
           nxt_nxt, dst, dir, visited, val + part_val + calcuDelay(nxt, nxt_nxt),
-          prefer_right, prefer_down, target_I, target_J, route_tables);
+          prefer_right, prefer_down, target_I, target_J, route_tables,
+          recurse_cnt + 1);
 
       // 如果找到路径，返回结果
       if (path_found) {
@@ -224,9 +239,14 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
 
   // Debugging output
 
-  // printf("Start to calc Path: src=%d, I_src=%d, J_src=%d --> dst=%d, "
-  //        "I_dst=%d, J_dst=%d\n",
-  //        src, I_src, J_src, dst, I_dst, J_dst);
+  auto logger = spdlog::get(global_logger_name);
+  // logger->debug("Start to calc Path: src=%d, I_src=%d, J_src=%d --> dst=%d, "
+  //               "I_dst=%d, J_dst=%d\n",
+  //               src, I_src, J_src, dst, I_dst, J_dst);
+  logger->debug(
+      "Start to calc Path: src={}, I_src={}, J_src={} --> dst={}, I_dst={}, "
+      "J_dst={}",
+      src, I_src, J_src, dst, I_dst, J_dst);
 
   if (I_src == I_dst && J_src == J_dst) {
     return calcE2ePathWithinDomain(src, dst, route_tables);
@@ -250,7 +270,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
 
     // 调用递归函数
     return findPathRecursive(src, dst, -1, visited, 0, prefer_right,
-                             prefer_down, I_dst, J_dst, route_tables);
+                             prefer_down, I_dst, J_dst, route_tables, 0);
   }
   printf(
       "Fail to find path from %d to %d in DomainHeuristicNode::calcE2ePath\n",

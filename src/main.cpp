@@ -9,6 +9,7 @@
 #include "satnet/domain_heuristic.hpp"
 #include "satnet/minhopcount.hpp"
 #include "satnet/space.hpp"
+#include "satnet/utils.hpp"
 // #include "spdlog/spdlog.h"
 
 // Define algorithm IDs as enum class for type safety
@@ -35,6 +36,8 @@ int main(int argc, char **argv) {
               << std::endl;
     return EXIT_FAILURE;
   }
+
+  setup_logger();
 
   // Parse command-line arguments
   const std::string configFileName(argv[1]);

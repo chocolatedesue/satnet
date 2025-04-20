@@ -129,7 +129,7 @@ extern std::vector<Average> failure_rates;
 extern const int MAX_RECURSE_CNT;
 
 // Define the logger name globally (optional but good practice)
-const std::string global_logger_name = "my_app_logger";
+extern const std::string global_logger_name;
 
 // Declaration of the function that sets up the logger
 void setup_logger();

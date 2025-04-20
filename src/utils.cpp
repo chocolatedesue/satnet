@@ -11,15 +11,58 @@
 
 #include "nlohmann/json.hpp"
 
-// #include "spdlog.h"
-// #include "sinks/stdout_color_sinks.h"
-// #include "sinks/basic_file_sink.h"
+// #include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h" // <-- Include this header
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/spdlog.h"
+#include <iostream> // For error reporting during setup
 #include <memory>
 #include <vector>
-#include <iostream> // For error reporting during setup
-
 
 using json = nlohmann::json;
+
+void setup_logger() {
+  if (spdlog::get(global_logger_name)) {
+    return;
+  }
+
+  try {
+    // 1. Create Sinks
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::warn); // Console only shows warn+
+
+    // --- Rotation Settings ---
+    const std::string log_filename = "log.txt";    // Base filename
+    const size_t max_file_size = 50 * 1024 * 1024; // 50 MB in bytes
+    const size_t max_files = 3; // Keep log.txt, log.1.txt, log.2.txt
+
+    // --- Create the rotating file sink ---
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        log_filename, max_file_size, max_files);
+    file_sink->set_level(spdlog::level::debug); // File shows debug+
+
+    // 2. Create the multi-sink logger (same as before)
+    std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
+    auto logger = std::make_shared<spdlog::logger>(global_logger_name,
+                                                   sinks.begin(), sinks.end());
+
+    // 3. Set the overall logger level (same as before)
+    logger->set_level(spdlog::level::debug);
+
+    // 4. Register the logger globally (same as before)
+    spdlog::register_logger(logger);
+
+    logger->info("Logger '{}' initialized with rotating file sink (Max Size: "
+                 "{}MB, Max Files: {}).",
+                 global_logger_name, max_file_size / (1024 * 1024), max_files);
+
+  } catch (const spdlog::spdlog_ex &ex) {
+    std::cerr << "Log initialization failed: " << ex.what() << std::endl;
+    exit(1);
+  }
+}
+
+const std::string global_logger_name = "satnet_logger";
 
 // --- 全局配置 (定义) ---
 namespace GlobalConfig {
