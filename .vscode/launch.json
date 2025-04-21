@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/linux/x86_64/debug/satnet-debug",
             "args": [
-                "${workspaceFolder}/configs/ng-full-starlink_group5-April.json",
+                "${workspaceFolder}/configs/ng-test-Jan.json",
                 "5100"
             ],
      

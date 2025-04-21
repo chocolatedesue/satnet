@@ -38,16 +38,19 @@ public:
   calcE2ePathWithinDomain(int src, int dst,
                           const std::vector<std::vector<int>> &route_tables);
 
-  static std::pair<double, bool>
-  findPathRecursive(int cur, int dst, int pre_dir, std::vector<bool> &visited,
-                    double val, bool prefer_right, bool prefer_down,
-                    int target_I, int target_J,
-                    const std::vector<std::vector<int>> &route_tables, int recurse_cnt);
+  static std::pair<double, bool> findPathRecursive(
+      int cur, int dst, int pre_dir, std::vector<bool> &visited, double val,
+      bool prefer_right, bool prefer_down, int target_I, int target_J,
+      const std::vector<std::vector<int>> &route_tables, int recurse_cnt);
 
   static double calculateHeuristicScore(int src, int dst);
 
   static std::vector<std::vector<std::vector<short>>> createBorderNodes();
-  
+
+  inline static const int domainMove(int cur_dmi, int dir) {
+    int x = cur_dmi / Kn, y = cur_dmi % Kn;
+  }
+
   inline static const std::vector<std::vector<std::vector<short>>> &
   getBorderNodes() {
     // The static local variable 'instance' will be initialized

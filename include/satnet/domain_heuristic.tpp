@@ -192,6 +192,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
   std::map<int, double> direction_scores;
 
   for (int i = 1; i <= 4; i++) {
+    // TODO: USE domainMove to replace node move
     int nxt = move(cur, i);
 
     int score = calculateHeuristicScore(nxt, dst);
@@ -290,16 +291,6 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
 
     // printf("Start finding path from %d to %d\n", src, dst);
     std::vector<bool> visited(GlobalConfig::N * 2, false);
-
-    // 计算正确的跨域启发信息
-    // int r_hop_cnt = (I_dst - I_src + Kp) % Kp;
-    // int l_hop_cnt = (I_src - I_dst + Kp) % Kp;
-    // int up_hop_cnt = (J_src - J_dst + Kn) % Kn;
-    // int down_hop_cnt = (J_dst - J_src + Kn) % Kn;
-
-    // 确定优先方向
-    // bool prefer_right = (r_hop_cnt <= l_hop_cnt);
-    // bool prefer_down = (down_hop_cnt <= up_hop_cnt);
 
     bool prefer_right = 1, prefer_down = 1;
 
