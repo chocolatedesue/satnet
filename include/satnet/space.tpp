@@ -173,6 +173,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_futr_banned() {
 template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
 
   cur_time = start_time;
+  // cur_time = 600, duration = 900;
   run_start = std::chrono::steady_clock::now();
 
   for (; cur_time < start_time + duration; cur_time += step) {
@@ -237,13 +238,14 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       auto dst = GlobalConfig::latency_observers[i].second;
       int latency = -1;
       bool success = 0;
-      logger ->
-          debug("Latency from {} to {} at time {}: ", src, dst, cur_time);
-      
-      if (cur_time < 600 || (cur_time > 1201 && cur_time < 3600) || 
+
+      if (cur_time < 600 || (cur_time > 1201 && cur_time < 3600) ||
           (cur_time > 4201 && cur_time < 6100)) {
         std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
       }
+
+      logger->debug("Calculate latency from {} to {}: {} ms, success: {} at time {}",
+                    src, dst, latency, success, cur_time);
 
       if (success) {
         GlobalConfig::failure_rates[i].add(0);
@@ -252,6 +254,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
         GlobalConfig::failure_rates[i].add(1);
         latency = -1;
       }
+
       if (latency != -1)
         GlobalConfig::latency_results[i].add(latency);
     }

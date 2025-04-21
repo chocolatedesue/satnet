@@ -117,19 +117,28 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
 template <int Kp, int Kn>
 double DomainHeuristicNode<Kp, Kn>::calculateHeuristicScore(int src, int dst) {
 
-  // int n_s = src % GlobalConfig::Q, p_s = src / GlobalConfig::Q;
-  // int n_d = dst % GlobalConfig::Q, p_d = dst / GlobalConfig::Q;
-  auto [I_s, J_s] = calcDomainCoords(src);
-  auto [I_d, J_d] = calcDomainCoords(dst);
+  // auto [I_s, J_s] = calcDomainCoords(src);
+  // auto [I_d, J_d] = calcDomainCoords(dst);
+
+  // int vertical_dist =
+  //     std::min(std::abs(J_s - J_d + Kn) % Kn,
+  //              std::abs(J_d - J_s + Kn) % Kn); // 垂直方向上的距离
+
+  // int horizontal_dist =
+  //     std::min(std::abs(I_s - I_d + Kp) % Kp, std::abs(I_d - I_s + Kp) % Kp);
+
+  int n_s = src % GlobalConfig::Q, p_s = src / GlobalConfig::Q;
+  int n_d = dst % GlobalConfig::Q, p_d = dst / GlobalConfig::Q;
 
   int vertical_dist =
-      std::min(std::abs(J_s - J_d  + Kn) % Kn,
-               std::abs(J_d - J_s + Kn) % Kn); // 垂直方向上的距离
+      std::min(std::abs(n_s - n_d + GlobalConfig::Q) % GlobalConfig::Q,
+               std::abs(n_d - n_s + GlobalConfig::Q) % GlobalConfig::Q);
 
-  int horizontal_dist = std::min(std::abs(I_s - I_d + Kp) % Kp,
-                                  std::abs(I_d - I_s + Kp) % Kp);
+  int horizontal_dist =
+      std::min(std::abs(p_s - p_d + GlobalConfig::P) % GlobalConfig::P,
+               std::abs(p_d - p_s + GlobalConfig::P) % GlobalConfig::P);
 
-  return vertical_dist + horizontal_dist;
+  return -(vertical_dist + horizontal_dist);
 }
 
 template <int Kp, int Kn>
@@ -156,6 +165,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
 
   // 检查当前节点是否已在目标域中
   const auto [cur_I, cur_J] = calcDomainCoords(cur);
+  int cur_dmid = calculateDomainId(cur);
   if (cur_I == target_I && cur_J == target_J) {
     // 当前节点已在目标域中，使用域内路由
     std::pair<double, bool> domain_result =
@@ -216,7 +226,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
   for (const auto &[dir, score] : sorted_directions) {
     // 如果存在边界节点，尝试路由
     const auto &border_nodes = getBorderNodes();
-    for (auto nxt : border_nodes[cur_I][dir]) {
+    for (auto nxt : border_nodes[cur_dmid][dir]) {
       // 检查是否有路由、是否被禁用、是否已访问
       if (!route_tables[cur][nxt] || banned[nxt][dir] == 1 || visited[nxt]) {
         continue;
@@ -265,13 +275,11 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
   // Debugging output
 
   auto logger = spdlog::get(global_logger_name);
-  // logger->debug("Start to calc Path: src=%d, I_src=%d, J_src=%d --> dst=%d, "
-  //               "I_dst=%d, J_dst=%d\n",
-  //               src, I_src, J_src, dst, I_dst, J_dst);
-  // logger->debug(
-  //     "Start to calc Path: src={}, I_src={}, J_src={} --> dst={}, I_dst={}, "
-  //     "J_dst={}",
-  //     src, I_src, J_src, dst, I_dst, J_dst);
+
+  logger->debug(
+      "Start to calc Path: src={}, I_src={}, J_src={} --> dst={}, I_dst={}, "
+      "J_dst={}",
+      src, I_src, J_src, dst, I_dst, J_dst);
 
   if (I_src == I_dst && J_src == J_dst) {
     return calcE2ePathWithinDomain(src, dst, route_tables);
@@ -281,7 +289,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
     // I_dst = dst / GlobalConfig::Q, J_dst = dst % GlobalConfig::Q;
 
     // printf("Start finding path from %d to %d\n", src, dst);
-    std::vector<bool> visited(GlobalConfig::N, false);
+    std::vector<bool> visited(GlobalConfig::N * 2, false);
 
     // 计算正确的跨域启发信息
     // int r_hop_cnt = (I_dst - I_src + Kp) % Kp;

@@ -13,8 +13,8 @@
         "propagation_delay_coef": 1.00,
         "propagation_speed": 299792458
     },
-
-    "duration": 6600,
+    "start_time" : 601,
+    "duration": 800,
     "step_length": 10,
     "update_period": 60,
     "refresh_period": 600,    
