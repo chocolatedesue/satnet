@@ -115,153 +115,195 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
 }
 
 template <int Kp, int Kn>
-double DomainHeuristicNode<Kp, Kn>::calculateHeuristicScore(int src, int dst) {
+double
+DomainHeuristicNode<Kp, Kn>::calculateHeuristicScoreWithDomain(int src_dmid,
+                                                               int dst_dmid) {
 
   // auto [I_s, J_s] = calcDomainCoords(src);
   // auto [I_d, J_d] = calcDomainCoords(dst);
-
-  // int vertical_dist =
-  //     std::min(std::abs(J_s - J_d + Kn) % Kn,
-  //              std::abs(J_d - J_s + Kn) % Kn); // 垂直方向上的距离
-
-  // int horizontal_dist =
-  //     std::min(std::abs(I_s - I_d + Kp) % Kp, std::abs(I_d - I_s + Kp) % Kp);
-
-  int n_s = src % GlobalConfig::Q, p_s = src / GlobalConfig::Q;
-  int n_d = dst % GlobalConfig::Q, p_d = dst / GlobalConfig::Q;
+  int I_s = src_dmid / Kn, J_s = src_dmid % Kn;
+  int I_d = dst_dmid / Kn, J_d = dst_dmid % Kn;
 
   int vertical_dist =
-      std::min(std::abs(n_s - n_d + GlobalConfig::Q) % GlobalConfig::Q,
-               std::abs(n_d - n_s + GlobalConfig::Q) % GlobalConfig::Q);
+      std::min(std::abs(J_s - J_d + Kn) % Kn,
+               std::abs(J_d - J_s + Kn) % Kn); // 垂直方向上的距离
 
   int horizontal_dist =
-      std::min(std::abs(p_s - p_d + GlobalConfig::P) % GlobalConfig::P,
-               std::abs(p_d - p_s + GlobalConfig::P) % GlobalConfig::P);
+      std::min(std::abs(I_s - I_d + Kp) % Kp, std::abs(I_d - I_s + Kp) % Kp);
+
+  // int n_s = src % GlobalConfig::Q, p_s = src / GlobalConfig::Q;
+  // int n_d = dst % GlobalConfig::Q, p_d = dst / GlobalConfig::Q;
+
+  // int vertical_dist =
+  //     std::min(std::abs(n_s - n_d + GlobalConfig::Q) % GlobalConfig::Q,
+  //              std::abs(n_d - n_s + GlobalConfig::Q) % GlobalConfig::Q);
+
+  // int horizontal_dist =
+  //     std::min(std::abs(p_s - p_d + GlobalConfig::P) % GlobalConfig::P,
+  //              std::abs(p_d - p_s + GlobalConfig::P) % GlobalConfig::P);
 
   return -(vertical_dist + horizontal_dist);
 }
 
 template <int Kp, int Kn>
 std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
-    int cur, int dst, int pre_dir, std::vector<bool> &visited, double val,
-    bool prefer_right, bool prefer_down, int target_I, int target_J,
-    const std::vector<std::vector<int>> &route_tables, int recurse_cnt) {
+    int current, int destination, int previous_direction,
+    std::vector<bool> &visited, double current_cost, bool prefer_right,
+    bool prefer_down, int target_domain_i, int target_domain_j,
+    const std::vector<std::vector<int>> &route_tables, int recursion_depth) {
 
   auto logger = spdlog::get(global_logger_name);
-  if (recurse_cnt > MAX_RECURSE_CNT) {
-    logger->warn("Recursion limit reached: cur={}, dst={}, pre_dir={}, "
-                 "recurse_cnt={}",
-                 cur, dst, pre_dir, recurse_cnt);
+
+  // Check recursion depth limit
+  if (recursion_depth > MAX_RECURSE_CNT) {
+    logger->warn("Recursion limit reached: current={}, destination={}, "
+                 "previous_direction={}, recursion_depth={}",
+                 current, destination, previous_direction, recursion_depth);
     return std::make_pair(-1, false);
   }
-  const auto &banned = GlobalConfig::futr_banned;
-  // 递归基本情况
-  if (cur == dst) {
-    return std::make_pair(val, true);
+
+  const auto &banned_links = GlobalConfig::futr_banned;
+
+  // Base case: we've reached the destination
+  if (current == destination) {
+    return std::make_pair(current_cost, true);
   }
 
-  // 标记当前节点为已访问
-  visited[cur] = true;
+  // Mark current node as visited
+  visited[current] = true;
 
-  // 检查当前节点是否已在目标域中
-  const auto [cur_I, cur_J] = calcDomainCoords(cur);
-  int cur_dmid = calculateDomainId(cur);
-  if (cur_I == target_I && cur_J == target_J) {
-    // 当前节点已在目标域中，使用域内路由
+  // Calculate current domain coordinates and ID
+  const auto [current_domain_i, current_domain_j] = calcDomainCoords(current);
+  int current_domain_id = calculateDomainId(current);
+
+  // Check if we've reached the target domain
+  if (current_domain_i == target_domain_i &&
+      current_domain_j == target_domain_j) {
+    // We're in the target domain, use intra-domain routing
     std::pair<double, bool> domain_result =
-        calcE2ePathWithinDomain(cur, dst, route_tables);
+        calcE2ePathWithinDomain(current, destination, route_tables);
 
     if (domain_result.second) {
-      return std::make_pair(val + domain_result.first, true);
+      return std::make_pair(current_cost + domain_result.first, true);
     } else {
-      visited[cur] = false; // 回溯
+      // Backtrack if no path found
+      visited[current] = false;
       return std::make_pair(-1, false);
     }
   }
 
-  // 计算水平和垂直方向上的跳数
-  // int r_hop_cnt = (target_I - cur_I + Kp) % Kp;    // 右跳数
-  // int l_hop_cnt = (cur_I - target_I + Kp) % Kp;    // 左跳数
-  // int down_hop_cnt = (target_J - cur_J + Kn) % Kn; // 下跳数
-  // int up_hop_cnt = (cur_J - target_J + Kn) % Kn;   // 上跳数
-
-  // 创建方向优先级数组，根据prefer_right和prefer_down设置顺序
-  std::vector<std::pair<int, int>> directions; // pair<方向, 跳数>
-
-  // 计算每个方向的启发式评分
+  // Calculate heuristic scores for each direction
   std::map<int, double> direction_scores;
+  int destination_domain_id = calculateDomainId(destination);
+  const auto &border_nodes = getBorderNodes();
 
-  for (int i = 1; i <= 4; i++) {
-    // TODO: USE domainMove to replace node move
-    int nxt = move(cur, i);
+  // Evaluate each possible direction (1=up, 2=right, 3=down, 4=left)
+  for (int direction = 1; direction <= 4; direction++) {
+    // Skip if no border nodes in this direction
+    if (border_nodes[current_domain_id][direction].empty()) {
+      continue;
+    }
 
-    int score = calculateHeuristicScore(nxt, dst);
-    direction_scores[i] = score;
+    // Use the first border node to estimate the domain we'd reach
+    int sample_border_node = border_nodes[current_domain_id][direction][0];
+    int next_node = move(sample_border_node, direction);
+
+    // Skip if move would be invalid
+    if (next_node == -1) {
+      continue;
+    }
+
+    int next_domain_id = calculateDomainId(next_node);
+    double heuristic_score = calculateHeuristicScoreWithDomain(
+        next_domain_id, destination_domain_id);
+    direction_scores[direction] = heuristic_score;
   }
 
-  // if (r_hop_cnt > 0) {
-  //   direction_scores[2] = prefer_right ? 100.0 : 50.0; // 右
-  // }
-  // if (l_hop_cnt > 0) {
-  //   direction_scores[4] = !prefer_right ? 100.0 : 50.0; // 左
-  // }
-
-  // // 垂直方向评分
-  // if (down_hop_cnt > 0) {
-  //   direction_scores[3] = prefer_down ? 80.0 : 40.0; // 下
-  // }
-  // if (up_hop_cnt > 0) {
-  //   direction_scores[1] = !prefer_down ? 80.0 : 40.0; // 上
-  // }
-
-  // 转换成vector并按分数排序
+  // Sort directions by heuristic score (highest first)
   std::vector<std::pair<int, double>> sorted_directions;
-  for (const auto &[dir, score] : direction_scores) {
-    sorted_directions.push_back({dir, score});
+  for (const auto &[direction, score] : direction_scores) {
+    sorted_directions.push_back({direction, score});
   }
 
   std::sort(sorted_directions.begin(), sorted_directions.end(),
             [](const auto &a, const auto &b) { return a.second > b.second; });
 
-  // 尝试每个方向
-  for (const auto &[dir, score] : sorted_directions) {
-    // 如果存在边界节点，尝试路由
-    const auto &border_nodes = getBorderNodes();
-    for (auto nxt : border_nodes[cur_dmid][dir]) {
-      // 检查是否有路由、是否被禁用、是否已访问
-      if (!route_tables[cur][nxt] || banned[nxt][dir] == 1 || visited[nxt]) {
+  // Try each direction in order of preference
+  for (const auto &[direction, score] : sorted_directions) {
+    // First check if the current node itself is a border node in this direction
+    const auto &border_nodes_in_direction =
+        border_nodes[current_domain_id][direction];
+    bool is_current_border_node =
+        std::find(border_nodes_in_direction.begin(),
+                  border_nodes_in_direction.end(),
+                  current) != border_nodes_in_direction.end();
+
+    if (is_current_border_node && banned_links[current][direction] != 1) {
+      // Current node is a border node - try moving directly to the next domain
+      int next_domain_node = move(current, direction);
+
+      if (next_domain_node != -1 && !visited[next_domain_node]) {
+        // Recursively try to find a path from the next domain
+        double link_cost = calcuDelay(current, next_domain_node);
+        const auto [final_cost, path_found] =
+            findPathRecursive(next_domain_node, destination, direction, visited,
+                              current_cost + link_cost, prefer_right,
+                              prefer_down, target_domain_i, target_domain_j,
+                              route_tables, recursion_depth + 1);
+
+        // If path found, return the result
+        if (path_found) {
+          return std::make_pair(final_cost, true);
+        }
+      }
+    }
+
+    // Process each border node in the chosen direction
+    for (auto border_node : border_nodes_in_direction) {
+      // Skip the current node as we already processed it above
+      if (border_node == current) {
         continue;
       }
 
-      // 计算到边界节点的路径值
-      const auto [part_val, success] =
-          calcE2ePathWithinDomain(cur, nxt, route_tables);
+      // Skip if route doesn't exist, link is banned, or node already visited
+      if (!route_tables[current][border_node] ||
+          banned_links[border_node][direction] == 1 || visited[border_node]) {
+        continue;
+      }
+
+      // Calculate path cost to border node
+      const auto [path_cost, success] =
+          calcE2ePathWithinDomain(current, border_node, route_tables);
+
       if (!success) {
         continue;
       }
 
-      int nxt_nxt = move(nxt, dir);
+      // Find the node in the next domain
+      int next_domain_node = move(border_node, direction);
 
-      if (nxt_nxt == -1 || visited[nxt_nxt]) {
+      if (next_domain_node == -1 || visited[next_domain_node]) {
         continue;
       }
 
-      const auto [final_val, path_found] = findPathRecursive(
-          nxt_nxt, dst, dir, visited, val + part_val + calcuDelay(nxt, nxt_nxt),
-          prefer_right, prefer_down, target_I, target_J, route_tables,
-          recurse_cnt + 1);
+      // Recursively try to find a path from the next domain
+      double new_cost =
+          current_cost + path_cost + calcuDelay(border_node, next_domain_node);
+      const auto [final_cost, path_found] = findPathRecursive(
+          next_domain_node, destination, direction, visited, new_cost,
+          prefer_right, prefer_down, target_domain_i, target_domain_j,
+          route_tables, recursion_depth + 1);
 
-      // 如果找到路径，返回结果
+      // If path found, return the result
       if (path_found) {
-        return std::make_pair(final_val, true);
+        return std::make_pair(final_cost, true);
       }
     }
   }
+  // Backtrack: mark current node as unvisited
+  visited[current] = false;
 
-  // 回溯：标记当前节点为未访问
-  visited[cur] = false;
-
-  // 所有方向都失败，返回失败结果
+  // All directions failed, return failure result
   return std::make_pair(-1, false);
 }
 
@@ -343,14 +385,16 @@ template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
 
   // Reset state for this computation run
   std::fill(vis.begin(), vis.end(), -1);
-  // Also reset route_table if it's being computed here
-  // std::fill(route_table.begin(), route_table.end(), -1); // Assuming
-  // route_table is accessible & needs reset
+
+  auto logger = spdlog::get(global_logger_name);
 
   std::queue<int> q;
 
-  // vis[id] = ;
   q.push(id);
+
+  if (id == 119) {
+    logger->debug("Start to calc intra routing in node {}", id);
+  }
 
   while (!q.empty()) {
     int cur = q.front();

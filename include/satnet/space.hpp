@@ -41,7 +41,7 @@ private:
 
   std::string config_file_name;
 
-  std::vector<BaseNode*> nodes;
+  std::vector<T*> nodes;
   std::vector<std::vector<int>> route_tables;
   // static std::vector<std::vector<short>> backup_route_tables;
   std::vector<int> path_vis;

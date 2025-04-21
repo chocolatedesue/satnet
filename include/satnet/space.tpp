@@ -237,15 +237,17 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
       int latency = -1;
-      bool success = 0;
+      bool success = false;
 
-      if (cur_time < 600 || (cur_time > 1201 && cur_time < 3600) ||
-          (cur_time > 4201 && cur_time < 6100)) {
-        std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
-      }
+      // if (cur_time < 600 || (cur_time > 1201 && cur_time < 3600) ||
+      //     (cur_time > 4201 && cur_time < 6100)) {
+      //   std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
+      // }
+      std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
 
-      logger->debug("Calculate latency from {} to {}: {} ms, success: {} at time {}",
-                    src, dst, latency, success, cur_time);
+      logger->debug(
+          "Calculate latency from {} to {}: {} ms, success: {} at time {}", src,
+          dst, latency, success, cur_time);
 
       if (success) {
         GlobalConfig::failure_rates[i].add(0);
