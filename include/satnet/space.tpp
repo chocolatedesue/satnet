@@ -228,11 +228,16 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       }
     }
 
-    if (cur_time % refresh_period == 0) {
-      std::cout << "Begin to report at time " << cur_time << std::endl;
-      report();
-    }
     auto logger = spdlog::get(global_logger_name);
+
+    if (cur_time % refresh_period == 0) {
+
+      logger->info("Begin to report at time {}", cur_time);
+      if (cur_time != start_time)
+        report();
+    }
+
+    logger->info("Begin to calculate latency at time {}", cur_time);
     for (int i = 0; i < GlobalConfig::num_observers; i++) {
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
