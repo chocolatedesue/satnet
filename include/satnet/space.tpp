@@ -75,7 +75,7 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
       GlobalConfig::N, std::vector<int>(GlobalConfig::N));
 
   // backup_route_tables = std::vector<std::vector<short>>(
-      // GlobalConfig::N, std::vector<short>(GlobalConfig::N));
+  // GlobalConfig::N, std::vector<short>(GlobalConfig::N));
 
   for (int i = 0; i < GlobalConfig::N; ++i) {
     nodes.push_back(new T(i));
@@ -231,14 +231,20 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       std::cout << "Begin to report at time " << cur_time << std::endl;
       report();
     }
-
-    
-
+    auto logger = spdlog::get(global_logger_name);
     for (int i = 0; i < GlobalConfig::num_observers; i++) {
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
-      auto [latency, success] = T::calcE2ePath(src, dst, route_tables);
-      // int latency = -1, success = 0;
+      int latency = -1;
+      bool success = 0;
+      logger ->
+          debug("Latency from {} to {} at time {}: ", src, dst, cur_time);
+      
+      if (cur_time < 600 || (cur_time > 1201 && cur_time < 3600) || 
+          (cur_time > 4201 && cur_time < 6100)) {
+        std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
+      }
+
       if (success) {
         GlobalConfig::failure_rates[i].add(0);
         GlobalConfig::latency_results[i].add(latency);

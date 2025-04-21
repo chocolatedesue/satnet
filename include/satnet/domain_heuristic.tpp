@@ -115,6 +115,24 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
 }
 
 template <int Kp, int Kn>
+double DomainHeuristicNode<Kp, Kn>::calculateHeuristicScore(int src, int dst) {
+
+  // int n_s = src % GlobalConfig::Q, p_s = src / GlobalConfig::Q;
+  // int n_d = dst % GlobalConfig::Q, p_d = dst / GlobalConfig::Q;
+  auto [I_s, J_s] = calcDomainCoords(src);
+  auto [I_d, J_d] = calcDomainCoords(dst);
+
+  int vertical_dist =
+      std::min(std::abs(J_s - J_d  + Kn) % Kn,
+               std::abs(J_d - J_s + Kn) % Kn); // 垂直方向上的距离
+
+  int horizontal_dist = std::min(std::abs(I_s - I_d + Kp) % Kp,
+                                  std::abs(I_d - I_s + Kp) % Kp);
+
+  return vertical_dist + horizontal_dist;
+}
+
+template <int Kp, int Kn>
 std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
     int cur, int dst, int pre_dir, std::vector<bool> &visited, double val,
     bool prefer_right, bool prefer_down, int target_I, int target_J,
@@ -152,10 +170,10 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
   }
 
   // 计算水平和垂直方向上的跳数
-  int r_hop_cnt = (target_I - cur_I + Kp) % Kp;    // 右跳数
-  int l_hop_cnt = (cur_I - target_I + Kp) % Kp;    // 左跳数
-  int down_hop_cnt = (target_J - cur_J + Kn) % Kn; // 下跳数
-  int up_hop_cnt = (cur_J - target_J + Kn) % Kn;   // 上跳数
+  // int r_hop_cnt = (target_I - cur_I + Kp) % Kp;    // 右跳数
+  // int l_hop_cnt = (cur_I - target_I + Kp) % Kp;    // 左跳数
+  // int down_hop_cnt = (target_J - cur_J + Kn) % Kn; // 下跳数
+  // int up_hop_cnt = (cur_J - target_J + Kn) % Kn;   // 上跳数
 
   // 创建方向优先级数组，根据prefer_right和prefer_down设置顺序
   std::vector<std::pair<int, int>> directions; // pair<方向, 跳数>
@@ -163,20 +181,27 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
   // 计算每个方向的启发式评分
   std::map<int, double> direction_scores;
 
-  if (r_hop_cnt > 0) {
-    direction_scores[2] = prefer_right ? 100.0 : 50.0; // 右
-  }
-  if (l_hop_cnt > 0) {
-    direction_scores[4] = !prefer_right ? 100.0 : 50.0; // 左
+  for (int i = 1; i <= 4; i++) {
+    int nxt = move(cur, i);
+
+    int score = calculateHeuristicScore(nxt, dst);
+    direction_scores[i] = score;
   }
 
-  // 垂直方向评分
-  if (down_hop_cnt > 0) {
-    direction_scores[3] = prefer_down ? 80.0 : 40.0; // 下
-  }
-  if (up_hop_cnt > 0) {
-    direction_scores[1] = !prefer_down ? 80.0 : 40.0; // 上
-  }
+  // if (r_hop_cnt > 0) {
+  //   direction_scores[2] = prefer_right ? 100.0 : 50.0; // 右
+  // }
+  // if (l_hop_cnt > 0) {
+  //   direction_scores[4] = !prefer_right ? 100.0 : 50.0; // 左
+  // }
+
+  // // 垂直方向评分
+  // if (down_hop_cnt > 0) {
+  //   direction_scores[3] = prefer_down ? 80.0 : 40.0; // 下
+  // }
+  // if (up_hop_cnt > 0) {
+  //   direction_scores[1] = !prefer_down ? 80.0 : 40.0; // 上
+  // }
 
   // 转换成vector并按分数排序
   std::vector<std::pair<int, double>> sorted_directions;
@@ -243,10 +268,10 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
   // logger->debug("Start to calc Path: src=%d, I_src=%d, J_src=%d --> dst=%d, "
   //               "I_dst=%d, J_dst=%d\n",
   //               src, I_src, J_src, dst, I_dst, J_dst);
-  logger->debug(
-      "Start to calc Path: src={}, I_src={}, J_src={} --> dst={}, I_dst={}, "
-      "J_dst={}",
-      src, I_src, J_src, dst, I_dst, J_dst);
+  // logger->debug(
+  //     "Start to calc Path: src={}, I_src={}, J_src={} --> dst={}, I_dst={}, "
+  //     "J_dst={}",
+  //     src, I_src, J_src, dst, I_dst, J_dst);
 
   if (I_src == I_dst && J_src == J_dst) {
     return calcE2ePathWithinDomain(src, dst, route_tables);
@@ -259,14 +284,16 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
     std::vector<bool> visited(GlobalConfig::N, false);
 
     // 计算正确的跨域启发信息
-    int r_hop_cnt = (I_dst - I_src + Kp) % Kp;
-    int l_hop_cnt = (I_src - I_dst + Kp) % Kp; // 修正左跳计算
-    int up_hop_cnt = (J_src - J_dst + Kn) % Kn;
-    int down_hop_cnt = (J_dst - J_src + Kn) % Kn;
+    // int r_hop_cnt = (I_dst - I_src + Kp) % Kp;
+    // int l_hop_cnt = (I_src - I_dst + Kp) % Kp;
+    // int up_hop_cnt = (J_src - J_dst + Kn) % Kn;
+    // int down_hop_cnt = (J_dst - J_src + Kn) % Kn;
 
     // 确定优先方向
-    bool prefer_right = (r_hop_cnt <= l_hop_cnt);
-    bool prefer_down = (down_hop_cnt <= up_hop_cnt);
+    // bool prefer_right = (r_hop_cnt <= l_hop_cnt);
+    // bool prefer_down = (down_hop_cnt <= up_hop_cnt);
+
+    bool prefer_right = 1, prefer_down = 1;
 
     // 调用递归函数
     return findPathRecursive(src, dst, -1, visited, 0, prefer_right,
@@ -282,8 +309,8 @@ template <int Kp, int Kn>
 std::pair<int, int>
 DomainHeuristicNode<Kp, Kn>::calcDomainCoords(int satelliteId) {
 
-  int n_s = satelliteId % GlobalConfig::Q;
   int p_s = satelliteId / GlobalConfig::Q;
+  int n_s = satelliteId % GlobalConfig::Q;
 
   // Use static_cast for clarity. Ensure P isn't zero.
   int I_s = static_cast<int>(

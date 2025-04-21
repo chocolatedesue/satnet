@@ -44,7 +44,7 @@ public:
                     int target_I, int target_J,
                     const std::vector<std::vector<int>> &route_tables, int recurse_cnt);
 
-  // inline static bool border_nodes_initialized = false;
+  static double calculateHeuristicScore(int src, int dst);
 
   static std::vector<std::vector<std::vector<short>>> createBorderNodes();
   
