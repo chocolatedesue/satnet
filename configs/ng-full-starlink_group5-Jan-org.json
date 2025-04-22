@@ -1,0 +1,38 @@
+{
+    "name": "startlink-v2-group5-Jan-org",
+    "constellation": {
+        "num_of_orbit_planes": 28,
+        "num_of_satellites_per_plane": 120,
+        "relative_spacing": 1,
+        "inclination": 43,
+        "altitude": 559
+    },
+    
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.00,
+        "propagation_speed": 299792458
+    },
+
+    "duration": 6600,
+    "step_length": 10,
+    "update_period": 60,
+    "refresh_period": 600,    
+
+    "num_latency_observers": 100,
+    "random_seed": 17,
+
+    "isl_state_dir": "data/startlink-v2-group5/isl-sun-outage",
+    "sat_position_dir": "data/startlink-v2-group5/sat-geocentric-position",
+    "sat_lla_dir": "data/startlink-v2-group5/sat-subpoint-position",
+    "sat_velocity_dir": "data/startlink-v2-group5/sat-move-direction",
+    "report_dir": "output",
+    "observer_config_path": "data/observers.txt",
+
+    "visualization": {
+        "source": 103,
+        "destination": 879,
+        "frames_dir": "visualization/frame_data",
+        "scenario": "full startlink-v2-group5 - Route Table"
+    }
+}

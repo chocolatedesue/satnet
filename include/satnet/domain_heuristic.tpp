@@ -179,10 +179,10 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
 
   // Check recursion depth limit
   if (recursion_depth > MAX_RECURSE_CNT) {
-    logger->warn("Recursion limit reached: current={}, destination={}, "
-                 "previous_direction={}, recursion_depth={}",
-                 current, destination, previous_direction, recursion_depth);
-    logger->flush();
+    // logger->warn("Recursion limit reached: current={}, destination={}, "
+    //              "previous_direction={}, recursion_depth={}",
+    //              current, destination, previous_direction, recursion_depth);
+    // logger->flush();
     return std::make_pair(-1, false);
   }
 

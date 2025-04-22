@@ -1,0 +1,34 @@
+{
+    "name": "ng-starlink-g5-April-23",
+    "constellation": {
+        "num_of_orbit_planes": 28,
+        "num_of_satellites_per_plane": 120,
+        "relative_spacing": 1,
+        "inclination": 43,
+        "altitude": 530
+    },
+    
+    "ISL_latency": {
+        "processing_delay": 0.5,
+        "propagation_delay_coef": 1.00,
+        "propagation_speed": 299792458
+    },
+
+    "duration": 6600,
+    "step_length": 10,
+    "update_period": 60,
+    "refresh_period": 600,    
+    "start_time": 0,
+
+    "num_latency_observers": 100,
+    "random_seed": 17,
+
+    "isl_state_dir": "data/ng-startlink-g5-April/isl-sun-outage",
+    "sat_position_dir": "data/ng-startlink-g5-April/sat-geocentric-position",
+    "sat_lla_dir": "data/ng-startlink-g5-April/sat-subpoint-position",
+    "sat_velocity_dir": "data/ng-startlink-g5-April/sat-move-direction",
+    "report_dir": "output",
+    "observer_config_path": "data/observers.txt"
+
+  
+}

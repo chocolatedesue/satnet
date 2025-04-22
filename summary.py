@@ -1,489 +1,544 @@
-import os
-# import re # 不再需要 re 模块
-from typing import Dict, List, Tuple, Any
-from scipy import stats
-import numpy as np
-# from enum import Enum # 如果想用Python Enum也可以，但直接用字典更简单直观
+# -*- coding: utf-8 -*-
+"""
+Processes algorithm performance report files to generate a summary CSV
+and latency distribution data for plotting.
+"""
 
-# --- 新增：直接定义算法名称到 ID 的映射 ---
-# 这个字典需要包含所有可能出现在报告文件中的算法名称及其对应的ID
-# ID 来自 C++ enum class 和之前的特殊定义
-# 注意：键 (key) 应该是报告文件中 'algorithm' 字段的确切字符串
-ALGORITHM_ID_MAP = {
-    "Oracle": 0,                # 特殊定义
-    "Base": 1000,               # 基于 C++ enum BASE_NODE (假设报告中是 "Base")
-    "CoinFlipBase": 2001,       # 特殊定义 (或对应某个未显示的 C++ enum?)
-    "CoinFlipPred": 2003,     # 基于 C++ enum COIN_FLIP_PRED_NODE (假设报告中是 "CoinFlipPred")
-    "DijkstraPred": 3003,     # 基于 C++ enum DIJKSTRA_PRED_NODE (假设报告中是 "DijkstraPred")
-    "MinHopCount": 5001,      # 基于 C++ enum MIN_HOP_COUNT_NODE (假设报告中是 "MinHopCount")
-    "DomainHeuristic": 5100,  # 基于 C++ enum DOMAIN_HEURISTIC_NODE (假设报告中是 "DomainHeuristic")
-    # --- 添加其他可能出现在报告中的算法及其（推测的或指定的）ID ---
-    # 例如，如果 DisCoRouteBase 等需要基于ID排序，需要给它们分配合适的ID
-    # 如果它们不需要基于ID排序，那么在排序时使用 .get() 的默认值即可
-    "DisCoRouteBase": 9000,   # 示例：分配一个ID，如果需要的话
-    "LBP": 9001,              # 示例
-    "DiffDomainBridge_10_3": 9100, # 示例
-    "DiffDomainBridge_10_1": 9101, # 示例
-    "LocalDomainBridge_10_3": 9200, # 示例
-    "LocalDomainBridge_10_1": 9201, # 示例
-    "DijkstraBase": 1001,     # 示例 (可能需要确认)
-    # ... 其他任何可能出现的算法名称
+import os
+from pathlib import Path # Use pathlib for better path handling
+from typing import Dict, List, Tuple, Any, Optional # Optional is cleaner than | None for hints
+import numpy as np
+from scipy import stats
+import re # Import re for potentially more robust parsing if needed, though split might suffice
+
+# =============================================================================
+# Configuration Section
+# (Keep the configuration section as defined in the previous good version)
+# =============================================================================
+# --- Input/Output Directories and Files ---
+REPORT_DIRECTORY = Path("output")
+OUTPUT_PLOT_DIRECTORY = REPORT_DIRECTORY / "plot_data"
+REPORT_FILE_SUFFIX = ".txt"
+REPORT_FILE_PREFIX = "report"
+SUMMARY_REPORT_FILENAME_TEMPLATE = "summary [{target_name}].csv"
+LATENCY_CDF_FILENAME_TEMPLATE = "{safe_algo_name}_latency_cdf.csv"
+
+# --- Target Scenarios ---
+TARGET_LIST = ["startlink-v2-group5-Apr"]
+
+# --- Algorithm Identification and Mapping ---
+ALGORITHM_ID_MAP: Dict[str, int] = {
+    "Oracle": 0, "Base": 1000, "DijkstraBase": 1001, "CoinFlipBase": 2001,
+    "CoinFlipPred": 2003, "DijkstraPred": 3003, "MinHopCount": 5001,
+    "MinHopCountPred": 5003, "DomainHeuristic": 5100, "DisCoRouteBase": 9000,
+    "LBP": 9001, "DiffDomainBridge_10_3": 9100, "DiffDomainBridge_10_1": 9101,
+    "DiffDomainBridge_8_3": 9102, "LocalDomainBridge_10_3": 9200,
+    "LocalDomainBridge_10_1": 9201,
+}
+DEFAULT_SORT_ID = float('inf')
+
+ALGORITHM_DISPLAY_MAPPING: Dict[str, str] = {
+    "DijkstraPred": "DT-DVTR", "MinHopCount": "MinHopCount", "MinHopCountPred": "FSA-LA",
+    "DisCoRouteBase": "DisCoRoute", "LBP": "LBP", "DiffDomainBridge_10_3": "DomainBridge",
+    "DiffDomainBridge_10_1": "DomainBridge_1", "DiffDomainBridge_8_3": "DomainBridge(8_3)",
+    "LocalDomainBridge_10_3": "LocalDM", "LocalDomainBridge_10_1": "LocalDM_1",
+    "DomainHeuristic": "DomainHeuristic", "CoinFlipPred": "CoinFlipPred",
+    "DijkstraBase": "DijkstraBase", "Base": "Base", "Oracle": "Oracle",
 }
 
-# --- 原有函数保持不变 (除了 get_algorithm_id_dict 被删除) ---
+# --- Reporting and Analysis Parameters ---
+ALGORITHM_OUTPUT_ORDER: List[str] = [
+    "DijkstraPred", "MinHopCount", "MinHopCountPred", "DisCoRouteBase", "LBP",
+    "DiffDomainBridge_10_3", "DiffDomainBridge_10_1", "DiffDomainBridge_8_3",
+    "LocalDomainBridge_10_3", "LocalDomainBridge_10_1", "DomainHeuristic",
+    "CoinFlipPred", "DijkstraBase", "Base", "Oracle",
+]
+BENCHMARK_ALGORITHM: str = "DijkstraPred"
+LATENCY_CDF_NUM_BINS: int = 200
+LATENCY_CDF_MIN_UPPER_BOUND: float = 300.0
+LATENCY_CDF_UPPER_BOUND_FACTOR: float = 1.2
+GENERATE_LATENCY_CDF_FILES: bool = True
 
-def read_report_file(file_path: str, target_name: str) -> Dict[str, Any] | None:
+# =============================================================================
+# Core Logic Functions
+# =============================================================================
+
+def read_report_file(file_path: Path, target_name: str) -> Optional[Dict[str, Any]]:
     """
-    从报告文件中读取数据
+    Reads and parses a single report file, handling flexible metadata keys
+    and the specific path data format.
 
     Args:
-        file_path: 报告文件路径
-        target_name: 目标场景名称
+        file_path: Path object for the report file.
+        target_name: The target scenario name to match against the 'name' field.
 
     Returns:
-        包含报告数据的字典，如果不匹配目标名称则返回None
+        A dictionary containing the parsed report data, or None if the file
+        doesn't match the target name, is unreadable, or has format errors.
     """
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f: # 指定编码是个好习惯
-            report_data = {}
+    report_data: Dict[str, Any] = {}
+    num_observers = -1
+    required_keys = {"name", "algorithm", "compute time", "update entry", "number of observers"}
+    found_keys = set()
 
-            # 读取元数据
+    try:
+        with file_path.open('r', encoding='utf-8') as f:
+            # --- Phase 1: Read Metadata Block ---
+            # Read lines until we find 'number of observers' or hit the path section/EOF
+            line_num = 0
             while True:
                 line = f.readline()
-                if not line or ':' not in line: # 处理文件末尾或空行/格式不符
-                    # 如果元数据不完整或格式错误，可以选择返回 None 或抛出异常
-                    print(f"警告: 文件 {file_path} 格式不正确或元数据不完整。")
+                line_num += 1
+                if not line:  # End of file before finding observer count or path data
+                    print(f"Warning: Unexpected end of file in {file_path} before finding 'number of observers' or path data.")
                     return None
-                key, value = line.split(":", 1) # 使用 split 1 次，避免值中包含冒号时出错
-                key = key.strip()
-                value = value.strip()
-                report_data[key] = value
-                if key == "number of observers":
-                    break
+                
+                stripped_line = line.strip()
 
-            # 检查名称是否匹配
+                # Stop metadata reading if we hit common separators or path start indicator
+                if stripped_line == "---" or stripped_line.startswith("route path"):
+                    # We hit the separator/path data before finding num_observers? Problem.
+                    if "number of observers" not in found_keys:
+                         print(f"Warning: Reached separator/path data in {file_path} at line {line_num} before finding 'number of observers'.")
+                         return None
+                    else:
+                        # Found num_observers, now process the line we just read
+                        # If it was "route path...", put it back conceptually for Phase 2
+                        # If it was "---" or empty, discard and move to Phase 2
+                        if stripped_line.startswith("route path"):
+                             current_line_for_path = line # Keep this line for Phase 2
+                        else:
+                             current_line_for_path = None
+                        break # Exit metadata reading loop
+
+                if ':' in line:
+                    key, value = line.split(":", 1)
+                    key = key.strip()
+                    value = value.strip()
+                    report_data[key] = value  # Store all metadata keys found
+                    found_keys.add(key)
+
+                    if key == "number of observers":
+                        try:
+                            num_observers = int(value)
+                            if num_observers < 0:
+                                raise ValueError("Number of observers cannot be negative")
+                            # Found it, keep reading metadata until separator/path/EOF
+                        except ValueError:
+                            print(f"Warning: Invalid 'number of observers' value '{value}' in {file_path} at line {line_num}.")
+                            return None
+                # Allow empty lines within the metadata section
+                elif not stripped_line:
+                     continue
+                # Found a line without ':' after potentially finding num_observers
+                # This might be the separator or start of path data
+                elif "number of observers" in found_keys:
+                     current_line_for_path = line # Keep this line for Phase 2
+                     break # Exit metadata reading loop
+
+
+            # --- Phase 2: Post-Metadata Validation ---
+            if num_observers == -1: # Should be caught earlier, but double-check
+                print(f"Warning: 'number of observers' key not found or processed in {file_path}.")
+                return None
+
+            # Check if all *required* keys were found
+            missing_keys = required_keys - found_keys
+            if missing_keys:
+                print(f"Warning: Missing required metadata keys in {file_path}: {missing_keys}")
+                return None
+
+            # Check if the scenario name matches *after* reading metadata
             if report_data.get("name") != target_name:
+                # print(f"Debug: Skipping {file_path.name}, name '{report_data.get('name')}' != target '{target_name}'")
+                return None # Not the target scenario, skip silently
+
+            # --- Phase 3: Read Path Data ---
+            route_paths: List[List[str]] = []
+            observers_read = 0
+
+            # Use the line potentially read at the end of Phase 1, or read a new one
+            current_line = current_line_for_path if current_line_for_path is not None else f.readline()
+
+            while observers_read < num_observers:
+                 # Find the start of the next path block ("route path [...]")
+                 while current_line:
+                     stripped_line = current_line.strip()
+                     if stripped_line.startswith("route path"):
+                         path_name = stripped_line # Use the whole line as identifier
+                         break # Found the start of the block
+                     # Skip empty lines or unexpected separators between path blocks
+                     elif not stripped_line or stripped_line == "---":
+                         current_line = f.readline()
+                         continue
+                     else:
+                         print(f"Warning: Unexpected non-empty line before 'route path' for observer {observers_read + 1} in {file_path}: '{stripped_line}'")
+                         # Decide how to handle: skip line or abort? Let's try skipping.
+                         # return None # Stricter: abort
+                         current_line = f.readline() # Skip and continue searching
+                 else: # current_line became empty (EOF) while searching for "route path"
+                      if observers_read < num_observers:
+                           print(f"Warning: Unexpected end of file in {file_path} while looking for 'route path' for observer {observers_read + 1} (expected {num_observers}). Found {observers_read}.")
+                      # Allow partial data? For now, require all observers.
+                      return None # Or return report_data if partial results are OK
+
+
+                 # Read the latency line (usually indented)
+                 latency_line = f.readline()
+                 if not latency_line: # EOF after path_name
+                      print(f"Warning: Unexpected EOF after reading '{path_name}' in {file_path}. Missing latency/failure.")
+                      return None
+
+                 # Read the failure rate line (usually indented)
+                 failure_line = f.readline()
+                 if not failure_line: # EOF after latency
+                      print(f"Warning: Unexpected EOF after reading latency line for '{path_name}' in {file_path}. Missing failure rate.")
+                      return None
+
+                 # Parse latency and failure rate
+                 try:
+                     # Use regex or split to handle potential variations? Split is simpler for now.
+                     if ':' not in latency_line or ':' not in failure_line:
+                         raise ValueError("Missing colon in latency/failure line")
+
+                     latency_str = latency_line.split(":", 1)[1].strip()
+                     failure_str = failure_line.split(":", 1)[1].strip()
+
+                     # Validate they are numbers
+                     float(latency_str)
+                     float(failure_str)
+                 except (IndexError, ValueError) as e:
+                     print(f"Warning: Error parsing latency/failure value for '{path_name}' in {file_path}. Error: {e}. Lines: '{latency_line.strip()}', '{failure_line.strip()}'")
+                     return None # Treat as critical format error
+
+                 route_paths.append([path_name, latency_str, failure_str])
+                 observers_read += 1
+
+                 # Read the next line to prepare for the next iteration's search for "route path"
+                 # This might be an empty line separator or the next "route path" directly
+                 current_line = f.readline()
+
+
+            # --- Final Check ---
+            if len(route_paths) != num_observers:
+                print(f"Warning: Mismatch between expected observers ({num_observers}) and successfully read paths ({len(route_paths)}) in {file_path}.")
+                # This case might indicate an issue in the loop logic or file format
                 return None
-
-            # 检查 number of observers 是否是有效数字
-            try:
-                num_observers = int(report_data["number of observers"])
-            except (ValueError, KeyError):
-                print(f"警告: 文件 {file_path} 中的 'number of observers' 无效。")
-                return None
-
-            # 读取路径信息
-            route_paths = []
-            for _ in range(num_observers):
-                path_name_line = f.readline()
-                latency_line = f.readline()
-                failure_line = f.readline()
-
-                # 添加健壮性检查，确保能读取到预期行且格式正确
-                if not path_name_line or not latency_line or not failure_line or \
-                   ':' not in latency_line or ':' not in failure_line:
-                    print(f"警告: 文件 {file_path} 中的路径信息不完整或格式错误。")
-                    # 根据策略决定是跳过该文件还是部分读取
-                    return None # 这里选择跳过整个文件
-
-                path_name = path_name_line.strip() # 通常路径名称就是一行
-                # 提取 latency 和 failure 时更健壮
-                try:
-                    latency = latency_line.split(":", 1)[1].strip()
-                    failure = failure_line.split(":", 1)[1].strip()
-                    # 尝试转换确保是数字，虽然 calculate_statistics 会做，但提前检查更好
-                    float(latency)
-                    float(failure)
-                except (IndexError, ValueError):
-                    print(f"警告: 文件 {file_path} 中解析 latency/failure 时出错。行: '{latency_line.strip()}', '{failure_line.strip()}'")
-                    return None # 跳过文件
-
-                route_paths.append([path_name, latency, failure])
 
             report_data["path info"] = route_paths
+            # print(f"Debug: Successfully parsed {file_path.name} for target '{target_name}'")
             return report_data
+
     except FileNotFoundError:
-        print(f"错误: 文件 {file_path} 未找到。")
+        print(f"Error: Report file not found: {file_path}")
+        return None
+    except IOError as e:
+        print(f"Error reading file {file_path}: {e}")
         return None
     except Exception as e:
-        print(f"读取文件 {file_path} 时发生未知错误: {e}")
+        print(f"An unexpected error occurred while reading {file_path}: {e}")
+        # import traceback
+        # traceback.print_exc() # Uncomment for detailed debugging if needed
         return None
 
 
-def get_records(directory: str, target_name: str) -> List[Dict[str, Any]]:
-    """
-    获取指定目录下所有匹配目标名称的记录
+# =============================================================================
+# Other Functions (get_records, calculate_statistics, create_summary_report, etc.)
+# Keep the implementations from the previous good refactoring, as they depend
+# on the output structure of read_report_file (which remains the same: a dict
+# with 'path info' list etc.), and the configuration variables.
+# =============================================================================
 
-    Args:
-        directory: 包含报告文件的目录
-        target_name: 目标场景名称
+# Define a type alias for the statistics tuple for clarity
+StatsTuple = Tuple[str, float, float, float, float, float, float, float]
 
-    Returns:
-        报告记录列表
-    """
+def get_records(directory: Path, target_name: str) -> List[Dict[str, Any]]:
+    """Scans a directory for report files matching the target scenario name."""
+    # (Implementation from previous version is likely fine)
     records = []
-    try:
-        files = sorted(os.listdir(directory))
-    except FileNotFoundError:
-        print(f"错误: 目录 '{directory}' 不存在。")
+    if not directory.is_dir():
+        print(f"Error: Report directory '{directory}' not found or is not a directory.")
         return []
 
-    for filename in files:
-        if "report" not in filename or not filename.endswith(".txt"): # 假设报告是 .txt
-            continue
+    print(f"Scanning directory '{directory}' for reports matching scenario '{target_name}'...")
+    file_count = 0
+    matched_count = 0
+    for file_path in sorted(directory.iterdir()): # Iterate over Path objects
+        if (file_path.is_file() and
+            file_path.name.startswith(REPORT_FILE_PREFIX) and
+            file_path.name.endswith(REPORT_FILE_SUFFIX)):
+            file_count += 1
+            report_data = read_report_file(file_path, target_name) # Use the NEW function here
+            if report_data:
+                records.append(report_data)
+                matched_count +=1
 
-        file_path = os.path.join(directory, filename)
-        report_data = read_report_file(file_path, target_name)
-
-        if report_data:
-            records.append(report_data)
-            print(f"处理文件: {file_path}")
-        # else: # 选择性打印跳过的文件
-        #     print(f"跳过文件 (名称不匹配或格式错误): {file_path}")
-
+    print(f"Scan complete. Found {file_count} potential report files, successfully parsed {matched_count} matching reports for scenario '{target_name}'.")
     return records
 
 
-def calculate_statistics(record: Dict[str, Any]) -> Tuple[str, float, float, float, float, float, float, float] | None:
-    """
-    计算记录的统计数据
-
-    Args:
-        record: 报告记录
-
-    Returns:
-        元组包含统计数据，如果数据无效则返回 None
-        (算法名称, 计算时间, 更新条目数, 平均失败率, 平均延迟, 50%延迟, 90%延迟, 99%延迟)
-    """
+def calculate_statistics(record: Dict[str, Any]) -> Optional[StatsTuple]:
+    """Calculates performance statistics from a single parsed report record."""
+    # (Implementation from previous version is likely fine, relies on keys being present)
     try:
-        algorithm_name = record["algorithm"]
+        algorithm_name = record["algorithm"] # Keep original name for internal use
         compute_time = float(record["compute time"])
         update_entry = float(record["update entry"])
-        paths = record["path info"]
-        num_observers = int(record["number of observers"])
+        paths = record["path info"] # This structure is maintained by the new reader
+        num_observers = int(record["number of observers"]) # Already validated in read_report_file
 
-        if num_observers <= 0: # 避免除以零和索引错误
-            print(f"警告: 算法 {algorithm_name} 的记录中 observers 数量为零或负数。")
+        if num_observers <= 0:
+            print(f"Warning: Algorithm '{algorithm_name}' record has {num_observers} observers. Cannot calculate statistics.")
             return None
 
-        # 计算平均值
         latencies = []
         total_failure_rate = 0.0
-        total_latency = 0.0
 
-        for i in range(num_observers):
-            # 再次检查路径数据格式，尽管 read_report_file 可能已检查
+        for i, path_data in enumerate(paths):
             try:
-                latency = float(paths[i][1])
-                failure_rate = float(paths[i][2])
-            except (IndexError, ValueError):
-                print(f"警告: 算法 {algorithm_name} 的路径数据无效: {paths[i]}")
-                return None # 或者选择跳过该条路径数据
+                # path_data[0] is the "route path [...]" string, not used here
+                latency = float(path_data[1])
+                failure_rate = float(path_data[2])
+                if not (np.isfinite(latency) and np.isfinite(failure_rate)):
+                    raise ValueError("Non-finite value detected")
+                latencies.append(latency)
+                total_failure_rate += failure_rate
+            except (IndexError, ValueError) as e:
+                print(f"Warning: Invalid path data for algorithm '{algorithm_name}', path '{path_data[0]}'. Data: {path_data}. Error: {e}. Skipping record.")
+                return None # Skip entire record if any path data is bad
 
-            total_latency += latency
-            total_failure_rate += failure_rate
-            latencies.append(latency)
+        if not latencies:
+             print(f"Warning: No valid latency data found for algorithm '{algorithm_name}'.")
+             return None
 
         avg_failure_rate = total_failure_rate / num_observers
-        avg_latency = total_latency / num_observers
+        avg_latency = np.mean(latencies)
 
-        # 计算百分位数
-        latencies.sort()
-        # 使用 numpy 的 percentile 函数更精确，尤其是在样本量不大时
         percentile_50 = np.percentile(latencies, 50)
         percentile_90 = np.percentile(latencies, 90)
         percentile_99 = np.percentile(latencies, 99)
-        # # 原来的简单索引方法 (适用于非常大的样本量)
-        # percentile_50 = latencies[min(int(num_observers * 0.50), num_observers - 1)]
-        # percentile_90 = latencies[min(int(num_observers * 0.90), num_observers - 1)]
-        # percentile_99 = latencies[min(int(num_observers * 0.99), num_observers - 1)]
-
 
         return (
-            algorithm_name,
-            compute_time,
-            update_entry,
-            avg_failure_rate,
-            avg_latency,
-            percentile_50,
-            percentile_90,
-            percentile_99
+            algorithm_name, compute_time, update_entry, avg_failure_rate,
+            avg_latency, percentile_50, percentile_90, percentile_99
         )
     except (KeyError, ValueError, TypeError) as e:
-        print(f"计算统计数据时出错: {e}. 记录: {record.get('algorithm', '未知算法')}")
+        algo = record.get('algorithm', 'Unknown Algorithm')
+        print(f"Error calculating statistics for '{algo}': {e}. Check required keys exist in report data.")
+        return None
+    except Exception as e:
+        algo = record.get('algorithm', 'Unknown Algorithm')
+        print(f"An unexpected error occurred during statistics calculation for '{algo}': {e}")
         return None
 
-# --- get_algorithm_id_dict 函数已被删除 ---
 
-def create_summary_report(target_name: str, records: List[Dict[str, Any]],
-                          algorithm_mapping: Dict[str, str]) -> None:
-    """
-    创建性能汇总报告
+def create_summary_report(
+    target_name: str, records: List[Dict[str, Any]],
+    algorithm_display_mapping: Dict[str, str], benchmark_algorithm: str, output_filename: Path
+) -> None:
+    """Calculates statistics for all records, compares against a benchmark, and writes a summary CSV file."""
+    # (Implementation from previous version is likely fine)
+    print(f"\nCreating summary report for scenario '{target_name}' -> {output_filename}")
 
-    Args:
-        target_name: 目标场景名称
-        records: 报告记录列表 (已排序)
-        algorithm_mapping: 算法名称到友好显示名称的映射字典
-    """
-    output_filename = f"summary [{target_name}].csv"
-    print(f"\n正在为场景 '{target_name}' 创建汇总报告: {output_filename}")
-
-    # 首先获取基准值（来自 DijkstraPred 算法）
-    base_update, base_latency = 1.0, 1.0 # 默认值以防找不到基准
-    base_p50, base_p90, base_p99 = 1.0, 1.0, 1.0
-    base_found = False
-
+    all_stats: Dict[str, StatsTuple] = {}
+    valid_records_in_order: List[str] = []
     for record in records:
-        if record.get("algorithm") == "DijkstraPred":
-            stats = calculate_statistics(record)
-            if stats:
-                _, _, base_update, _, base_latency, base_p50, base_p90, base_p99 = stats
-                 # 防止基准值为0导致除零错误
-                base_update = base_update if base_update != 0 else 1.0
-                base_latency = base_latency if base_latency != 0 else 1.0
-                base_p50 = base_p50 if base_p50 != 0 else 1.0
-                base_p90 = base_p90 if base_p90 != 0 else 1.0
-                base_p99 = base_p99 if base_p99 != 0 else 1.0
-                base_found = True
-                print(f"找到基准算法 DijkstraPred: Update={base_update:.2f}, Latency={base_latency:.2f}")
-                break
-    if not base_found:
-         print("警告: 未找到基准算法 'DijkstraPred' 的有效数据，相对值可能不准确。")
+        algo_name = record.get("algorithm")
+        if not algo_name: continue # Should have been caught earlier
+        stats = calculate_statistics(record)
+        if stats:
+            all_stats[algo_name] = stats
+            valid_records_in_order.append(algo_name)
+        else:
+            print(f"Warning: Skipping algorithm '{algo_name}' in summary due to errors in statistics calculation.")
 
+    if not all_stats:
+        print("Error: No valid statistics could be calculated. Summary report cannot be generated.")
+        return
+
+    base_stats = all_stats.get(benchmark_algorithm)
+    if not base_stats:
+        print(f"Warning: Benchmark algorithm '{benchmark_algorithm}' not found or had errors. Relative values cannot be calculated.")
+        base_update, base_latency, base_p50, base_p90, base_p99 = 1.0, 1.0, 1.0, 1.0, 1.0
+    else:
+        base_update = base_stats[2] if base_stats[2] != 0 else 1.0
+        base_latency = base_stats[4] if base_stats[4] != 0 else 1.0
+        base_p50 = base_stats[5] if base_stats[5] != 0 else 1.0
+        base_p90 = base_stats[6] if base_stats[6] != 0 else 1.0
+        base_p99 = base_stats[7] if base_stats[7] != 0 else 1.0
+        print(f"Using benchmark '{benchmark_algorithm}': Update={base_stats[2]:.2f}, Avg Latency={base_stats[4]:.2f}ms")
 
     try:
-        with open(output_filename, 'w', encoding='utf-8') as f:
-            # 写入标题行
-            f.write("Algorithm Name,Compute Time (s),Update Entry (#),Update Entry (Relative %),Failure Rate (%),Avg Latency (ms),Avg Latency (Relative %),P50 Latency (ms),P50 Latency (Relative %),P90 Latency (ms),P90 Latency (Relative %),P99 Latency (ms),P99 Latency (Relative %)\n")
+        with output_filename.open('w', encoding='utf-8', newline='') as f:
+            header = [
+                "Algorithm Name", "Compute Time (s)", "Update Entry (#)",
+                "Update Entry (Relative %)", "Failure Rate (%)", "Avg Latency (ms)",
+                "Avg Latency (Relative %)", "P50 Latency (ms)", "P50 Latency (Relative %)",
+                "P90 Latency (ms)", "P90 Latency (Relative %)", "P99 Latency (ms)",
+                "P99 Latency (Relative %)"
+            ]
+            f.write(",".join(header) + "\n")
 
-            # 写入每个算法的数据
-            for record in records:
-                stats = calculate_statistics(record)
-                if not stats:
-                    print(f"跳过无效记录: {record.get('algorithm', '未知算法')}")
-                    continue # 跳过无法计算统计数据的记录
+            for algorithm_name in valid_records_in_order:
+                 stats = all_stats[algorithm_name]
+                 (algo_name_internal, compute_time, update_entry, avg_failure_rate,
+                  avg_latency, p50, p90, p99) = stats
+                 display_name = algorithm_display_mapping.get(algo_name_internal, algo_name_internal)
 
-                algorithm_name, compute_time, update_entry, avg_failure_rate, avg_latency, p50, p90, p99 = stats
+                 rel_update = (update_entry - base_stats[2]) / base_update if base_stats else 0.0
+                 rel_latency = (avg_latency - base_stats[4]) / base_latency if base_stats else 0.0
+                 rel_p50 = (p50 - base_stats[5]) / base_p50 if base_stats else 0.0
+                 rel_p90 = (p90 - base_stats[6]) / base_p90 if base_stats else 0.0
+                 rel_p99 = (p99 - base_stats[7]) / base_p99 if base_stats else 0.0
 
-                # 计算相对值 (更安全地处理除零)
-                rel_update = (update_entry - base_update) / base_update if base_update else 0
-                rel_latency = (avg_latency - base_latency) / base_latency if base_latency else 0
-                rel_p50 = (p50 - base_p50) / base_p50 if base_p50 else 0
-                rel_p90 = (p90 - base_p90) / base_p90 if base_p90 else 0
-                rel_p99 = (p99 - base_p99) / base_p99 if base_p99 else 0
-
-                # 格式化更新条目
-                update_entry_text = f"{update_entry:.2f}"
-                # # 显示相对值的条件可以调整
-                # if abs(rel_update) < 2 and algorithm_name != "Oracle": # 原来的条件
-                #     update_entry_text += f" ({rel_update:+.2%})" # 百分比放后面
-
-                # 使用友好的算法名称
-                display_name = algorithm_mapping.get(algorithm_name, algorithm_name) # 如果映射中没有，则使用原始名称
-
-                # 写入格式化的行 (将相对值放在单独的列中，更清晰)
-                line = (f"{display_name},"
-                        f"{compute_time:.2f},"
-                        f"{update_entry:.2f},"
-                        f"{rel_update:+.2%}," # 相对更新条目单独一列
-                        f"{avg_failure_rate:.4%},"
-                        f"{avg_latency:.2f},"
-                        f"{rel_latency:+.2%}," # 相对延迟单独一列
-                        f"{p50:.2f},"
-                        f"{rel_p50:+.2%},"    # 相对P50单独一列
-                        f"{p90:.2f},"
-                        f"{rel_p90:+.2%},"    # 相对P90单独一列
-                        f"{p99:.2f},"
-                        f"{rel_p99:+.2%}\n")  # 相对P99单独一列
-                f.write(line)
-        print(f"成功写入汇总报告: {output_filename}")
-
+                 line_data = [
+                     f'"{display_name}"', f"{compute_time:.2f}", f"{update_entry:.2f}",
+                     f"{rel_update:+.2%}" if base_stats else "N/A", f"{avg_failure_rate:.4%}",
+                     f"{avg_latency:.2f}", f"{rel_latency:+.2%}" if base_stats else "N/A",
+                     f"{p50:.2f}", f"{rel_p50:+.2%}" if base_stats else "N/A",
+                     f"{p90:.2f}", f"{rel_p90:+.2%}" if base_stats else "N/A",
+                     f"{p99:.2f}", f"{rel_p99:+.2%}" if base_stats else "N/A",
+                 ]
+                 f.write(",".join(line_data) + "\n")
+        print(f"Successfully written summary report: {output_filename}")
     except IOError as e:
-        print(f"写入文件 {output_filename} 时出错: {e}")
+        print(f"Error writing summary file {output_filename}: {e}")
     except Exception as e:
-        print(f"创建汇总报告时发生未知错误: {e}")
+        print(f"An unexpected error occurred while creating summary report: {e}")
+
+def sanitize_filename(name: str) -> str:
+    """Removes or replaces characters unsuitable for filenames."""
+    # (Implementation from previous version is likely fine)
+    sanitized = "".join(c if c.isalnum() or c in ['_', '-'] else '_' for c in name)
+    sanitized = '_'.join(filter(None, sanitized.split('_')))
+    return sanitized.strip('_ ')
 
 
-def generate_latency_distribution(record: Dict[str, Any], algorithm_name: str) -> None:
-    """
-    生成延迟分布数据文件
-
-    Args:
-        record: 报告记录
-        algorithm_name: 算法名称 (用于文件名)
-    """
+def generate_latency_distribution(
+    record: Dict[str, Any], algorithm_name: str, output_dir: Path,
+    num_bins: int, min_upper_bound: float, upper_bound_factor: float, filename_template: str
+) -> None:
+    """Generates a CSV file containing data points for a latency CDF plot."""
+    # (Implementation from previous version is likely fine)
     try:
         paths = record.get("path info", [])
-        if not paths:
-            print(f"警告: 算法 {algorithm_name} 没有路径信息，无法生成延迟分布。")
-            return
+        if not paths: return
 
-        # 提取所有路径的延迟数据，添加错误处理
         latency_data = []
-        for path in paths:
+        for i, path in enumerate(paths):
             try:
-                latency_data.append(float(path[1]))
-            except (IndexError, ValueError):
-                 print(f"警告: 算法 {algorithm_name} 发现无效延迟数据: {path}")
-                 #可以选择跳过这条数据或整个文件
-        if not latency_data:
-             print(f"警告: 算法 {algorithm_name} 没有有效的延迟数据点。")
-             return
+                latency = float(path[1])
+                if np.isfinite(latency) and latency >= 0:
+                    latency_data.append(latency)
+                # else: # Optional: Warn about invalid values
+            except (IndexError, ValueError): continue # Ignore parsing errors here, handled in calculate_stats
 
-        latency_data = np.array(latency_data)
+        if not latency_data: return
+        latency_array = np.array(latency_data)
 
-        # 定义延迟范围和分箱数量 (可以根据数据调整)
-        min_latency = max(0, np.min(latency_data) - 10) # 略小于最小值
-        max_latency = np.max(latency_data) + 10      # 略大于最大值
-        num_bins = 100 # 或根据数据量动态调整
+        if len(latency_array) > 10:
+             p99_9 = np.percentile(latency_array, 99.9)
+             realistic_upper_bound = max(min_upper_bound, p99_9 * upper_bound_factor)
+        else:
+             realistic_upper_bound = max(min_upper_bound, np.max(latency_array) * upper_bound_factor if latency_array.size > 0 else min_upper_bound)
 
-        # 计算频率分布 (使用 numpy.histogram)
-        # hist, bin_edges = np.histogram(latency_data, bins=num_bins, range=(min_latency, max_latency), density=False)
-        # cumulative_freq = np.cumsum(hist)
-        # total_count = len(latency_data)
-        # cumulative_fraction = cumulative_freq / total_count
-        # bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+        cumfreq_result = stats.cumfreq(latency_array, numbins=num_bins, defaultreallimits=(0, realistic_upper_bound))
+        x_coords = cumfreq_result.lowerlimit + np.linspace(cumfreq_result.binsize, cumfreq_result.binsize * cumfreq_result.cumcount.size, cumfreq_result.cumcount.size)
+        y_coords = cumfreq_result.cumcount / len(latency_array)
 
-        # 或者使用 scipy.stats.cumfreq 更直接获取累积分布点
-        # 注意：cumfreq 的默认分箱可能与之前不同，可能需要调整 numbins 或 defaultreallimits
-        # 使用一个合理的上限，比如预期最大延迟的1.2倍或一个固定大值
-        realistic_upper_bound = max(300, np.percentile(latency_data, 99.9) * 1.2 if len(latency_data)>10 else 300)
-        cumfreq_result = stats.cumfreq(latency_data, numbins=200, defaultreallimits=(0, realistic_upper_bound))
+        output_dir.mkdir(parents=True, exist_ok=True)
+        safe_algo_name = sanitize_filename(algorithm_name)
+        output_filename = filename_template.format(safe_algo_name=safe_algo_name)
+        output_path = output_dir / output_filename
 
-        # 提取绘图数据点
-        plot_x = cumfreq_result.lowerlimit + np.linspace(0, cumfreq_result.binsize * cumfreq_result.cumcount.size, cumfreq_result.cumcount.size)
-        plot_y = cumfreq_result.cumcount / len(latency_data) # 转换为分数 (0 to 1)
-
-        # 保存到文件
-        output_dir = "output/plot_data"
-        # os.makedirs(output_dir, exist_ok=True) # 确保目录存在
-        from pathlib import Path
-        Path(output_dir).mkdir(parents=True, exist_ok=True) # 确保目录存在
-        # 清理算法名称，使其适合做文件名
-        safe_algo_name = "".join(c if c.isalnum() else "_" for c in algorithm_name)
-        output_path = os.path.join(output_dir, f"{safe_algo_name}_latency_cdf.csv")
-
-        with open(output_path, "w", encoding='utf-8') as pf:
+        with output_path.open("w", encoding='utf-8', newline='') as pf:
             pf.write("Latency (ms),Cumulative Fraction\n")
-            # 写入 (0, 0) 点使图形从原点开始
-            if plot_x[0] > 0:
+            if cumfreq_result.lowerlimit >= 0 and (len(x_coords) == 0 or x_coords[0] > 0):
                  pf.write("0.000000,0.000000\n")
-            for x, y in zip(plot_x, plot_y):
-                # 过滤掉可能的无效计算结果（虽然不太可能）
-                if np.isfinite(x) and np.isfinite(y):
+            last_y = 0.0
+            for x, y in zip(x_coords, y_coords):
+                if np.isfinite(x) and np.isfinite(y) and y >= last_y:
                     pf.write(f"{x:.6f},{y:.6f}\n")
-            # 确保最后一个点是 (max_latency, 1.0) 如果需要的话
-            # if plot_y[-1] < 1.0:
-            #      pf.write(f"{plot_x[-1]:.6f},1.000000\n") # 或者用实际的最大延迟
-
-        print(f"已生成延迟分布数据: {output_path}")
-
-    except (KeyError, ValueError, TypeError, IOError) as e:
-        print(f"为算法 {algorithm_name} 生成延迟分布时出错: {e}")
+                    last_y = y
     except Exception as e:
-         print(f"为算法 {algorithm_name} 生成延迟分布时发生未知错误: {e}")
+        print(f"An unexpected error occurred during latency CDF generation for '{algorithm_name}': {e}")
 
 
+def sort_records(records: List[Dict[str, Any]], algorithm_id_map: Dict[str, int], output_order: List[str]) -> List[Dict[str, Any]]:
+    """Sorts the records based on the predefined output order and ID fallback."""
+    # (Implementation from previous version is likely fine)
+    order_dict = {name: index for index, name in enumerate(output_order)}
+    fallback_order_index = len(output_order)
+
+    def sort_key(record):
+        algo_name = record.get("algorithm", "")
+        primary_key = order_dict.get(algo_name, fallback_order_index)
+        secondary_key = algorithm_id_map.get(algo_name, DEFAULT_SORT_ID)
+        return (primary_key, secondary_key)
+
+    try:
+        sorted_records = sorted(records, key=sort_key)
+        print("\nRecords sorted according to predefined output order (with ID fallback).")
+        print("Final processing order of algorithms:")
+        for i, rec in enumerate(sorted_records):
+            algo_name = rec.get('algorithm', 'UNKNOWN')
+            display_name = ALGORITHM_DISPLAY_MAPPING.get(algo_name, algo_name)
+            print(f"  {i+1}. {algo_name} (Display: {display_name})")
+        return sorted_records
+    except Exception as e:
+        print(f"Error during record sorting: {e}. Returning unsorted records.")
+        return records
+
+
+# =============================================================================
+# Main Execution
+# =============================================================================
 def main():
-    """主函数"""
-    # --- 使用硬编码的算法ID映射 ---
-    # ALGORITHM_ID_MAP 在文件顶部定义
+    """Main function to orchestrate the report processing."""
+    # (Implementation from previous version is likely fine)
+    print("=" * 60)
+    print("Starting Report Processing Script")
+    print(f"Report Directory: {REPORT_DIRECTORY.resolve()}")
+    print(f"Output Plot Data Directory: {OUTPUT_PLOT_DIRECTORY.resolve()}")
+    print(f"Benchmark Algorithm: {BENCHMARK_ALGORITHM}")
+    print("=" * 60)
+    print("\n--- Configuration Summary ---")
+    print(f"Target Scenarios: {TARGET_LIST}")
+    print(f"Algorithm Output Order: {ALGORITHM_OUTPUT_ORDER}")
+    print(f"Generate Latency CDFs: {GENERATE_LATENCY_CDF_FILES}")
+    print("-" * 30)
 
-    print("使用的算法ID映射:")
-    for name, id_val in ALGORITHM_ID_MAP.items():
-        print(f"  - {name}: {id_val}")
-    print("-" * 20)
-
-    # 定义目标场景
-    # target_list = ["full full-gw-2000 - Jan", "startlink-v2-group5-Jan", "startlink-v2-group5-Apr","startlink-v2-group5-Jul"]
-    # 测试用，只选一个
-    target_list = ["startlink-v2-group5-Apr"]
-
-
-    # 定义算法名称到友好显示名称的映射
-    algorithm_display_mapping = {
-        "DiffDomainBridge_10_3": "DomainBridge",
-        "DiffDomainBridge_10_1": "DomainBridge_1",
-        "LocalDomainBridge_10_3": "LocalDM",
-        "LocalDomainBridge_10_1": "LocalDM_1",
-        "DiffDomainBridge_8_3": "DomainBridge(8_3)", # 保持区分度
-        "DisCoRouteBase": "DisCoRoute",
-        "DijkstraPred": "DT-DVTR",
-        "MinHopCount": "MinHopCount",
-        "MinHopCountPred": "FSA-LA",
-        "LBP": "LBP",
-        "DijkstraBase": "DijkstraBase",
-        "CoinFlipPred": "CoinFlipPred", # 添加映射（如果需要友好名称）
-        "DomainHeuristic": "DomainHeuristic" # 添加映射
-        # ... 其他算法的友好名称
-    }
-    print("使用的算法显示名称映射:")
-    for orig, disp in algorithm_display_mapping.items():
-        print(f"  - '{orig}' -> '{disp}'")
-    print("-" * 20)
-
-    # 预定义的算法在汇总报告中的排序顺序
-    # 这个顺序会覆盖基于ID的排序，决定最终输出文件的行顺序
-    algorithm_output_order = [
-        "DijkstraPred",      # DT-DVTR
-        "MinHopCount",       # MinHopCount
-        "MinHopCountPred",   # FSA-LA
-        "DisCoRouteBase",    # DisCoRoute
-        "LBP",               # LBP
-        "DiffDomainBridge_10_3", # DomainBridge
-        "DiffDomainBridge_10_1", # DomainBridge_1
-        "LocalDomainBridge_10_3",# LocalDM
-        "LocalDomainBridge_10_1",# LocalDM_1
-        # 添加其他你想固定顺序的算法
-        "DomainHeuristic",
-        "CoinFlipPred",
-        "DijkstraBase",
-        "Base",
-        "Oracle",            # 通常放最后或最前？
-    ]
-    print("汇总报告中的算法输出顺序:", algorithm_output_order)
-    print("-" * 20)
-
-
-    # 处理每个目标场景
-    for target_name in target_list:
-        print(f"\n===== 开始处理场景: {target_name} =====")
-        # 获取所有记录
-        records = get_records("output", target_name) # 假设报告在 'output' 目录下
-
+    for target_name in TARGET_LIST:
+        print(f"\n===== Processing Scenario: {target_name} =====")
+        records = get_records(REPORT_DIRECTORY, target_name) # Uses new read_report_file
         if not records:
-            print(f"场景 '{target_name}' 没有找到匹配的报告文件或有效数据。")
+            print(f"No matching reports found or parsed for scenario '{target_name}'. Skipping.")
             continue
 
-        # --- 排序逻辑 ---
-        # 1. (可选) 首先按算法ID排序。如果ID主要用于分组或初步排序，可以保留。
-        #    使用 .get() 处理映射中可能不存在的算法名，将它们排在后面。
-        DEFAULT_SORT_ID = float('inf') # 未知ID的算法排在最后
-        records.sort(key=lambda r: ALGORITHM_ID_MAP.get(r.get("algorithm", ""), DEFAULT_SORT_ID))
-        print("记录已按算法ID初步排序 (未知ID排最后)")
+        sorted_records = sort_records(records, ALGORITHM_ID_MAP, ALGORITHM_OUTPUT_ORDER)
 
-        # 2. 按预定义的输出顺序排序。这是决定最终CSV文件顺序的关键步骤。
-        #    不在预定义顺序列表中的算法会排在列表之后（顺序取决于上一步ID排序或保持稳定）。
-        order_dict = {name: index for index, name in enumerate(algorithm_output_order)}
-        records.sort(
-            key=lambda r: order_dict.get(r.get("algorithm", ""), len(algorithm_output_order))
-        )
-        print("记录已按预定义的输出顺序最终排序")
-        print("最终处理顺序中的算法:")
-        for rec in records: print(f"  - {rec.get('algorithm')}")
+        summary_filename = Path(SUMMARY_REPORT_FILENAME_TEMPLATE.format(target_name=target_name))
+        create_summary_report(target_name, sorted_records, ALGORITHM_DISPLAY_MAPPING, BENCHMARK_ALGORITHM, summary_filename)
 
+        if GENERATE_LATENCY_CDF_FILES:
+            print("\nGenerating latency distribution CDF files...")
+            cdf_count = 0
+            for record in sorted_records:
+                algo_name = record.get("algorithm")
+                if algo_name:
+                    generate_latency_distribution(
+                        record, algo_name, OUTPUT_PLOT_DIRECTORY, LATENCY_CDF_NUM_BINS,
+                        LATENCY_CDF_MIN_UPPER_BOUND, LATENCY_CDF_UPPER_BOUND_FACTOR, LATENCY_CDF_FILENAME_TEMPLATE
+                    )
+                    cdf_count += 1
+            print(f"Generated {cdf_count} CDF data files in '{OUTPUT_PLOT_DIRECTORY}'.")
 
-        # 创建汇总报告
-        create_summary_report(target_name, records, algorithm_display_mapping)
+        print(f"===== Finished Processing Scenario: {target_name} =====")
 
-        # （可选）为每个算法生成延迟分布数据
-        print("\n开始生成延迟分布数据...")
-        for record in records:
-             algo_name = record.get("algorithm")
-             if algo_name:
-                 generate_latency_distribution(record, algo_name)
+    print("\n" + "=" * 60)
+    print("Report Processing Script Finished")
+    print("=" * 60)
 
-        print(f"===== 完成处理场景: {target_name} =====")
 
 if __name__ == "__main__":
     main()
