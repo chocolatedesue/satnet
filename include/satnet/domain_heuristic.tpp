@@ -7,8 +7,10 @@
 #include "satnet/utils.hpp"
 #include <cmath> // For std::floor
 #include <cstdio>
+#include <cstdlib>
 #include <limits> // Potentially for checking invalid IDs or distances
 #include <map>
+#include <set>
 #include <stdexcept> // For potential error handling (e.g., invalid config)
 // --- Constructor Definition ---
 #include <concepts>
@@ -94,20 +96,33 @@ DomainHeuristicNode<Kp, Kn>::createBorderNodes() {
 }
 
 // 域内路由辅助函数
+// TODO: fix possible bug
 template <int Kp, int Kn>
 std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
     int src, int dst, const std::vector<std::vector<int>> &route_tables) {
   int val = 0;
   int cur = src;
+  auto logger = spdlog::get(global_logger_name);
+  std::set<int> visited; // Changed from std::set<int> visited();
+  visited.insert(cur);
+  // return std::make_pair(-1, false);
+  int cur_dmid = calculateDomainId(cur);
   while (cur != dst) {
     int nxt_dir = route_tables[cur][dst];
+
     if (!nxt_dir) {
+
       return std::make_pair(-1, false);
     }
     int nxt = move(cur, nxt_dir);
-    if (nxt == -1) {
+    int nxt_dmid = calculateDomainId(nxt);
+    if (nxt == -1 || nxt_dmid != cur_dmid ||
+        GlobalConfig::cur_banned[cur][nxt_dir] || visited.count(nxt)) {
+
       return std::pair<double, bool>(-1, false);
     }
+    visited.insert(nxt);
+
     val += calcuDelay(cur, nxt);
     cur = nxt;
   }
@@ -150,15 +165,24 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
     int current, int destination, int previous_direction,
     std::vector<bool> &visited, double current_cost, bool prefer_right,
     bool prefer_down, int target_domain_i, int target_domain_j,
-    const std::vector<std::vector<int>> &route_tables, int recursion_depth) {
+    const std::vector<std::vector<int>> &route_tables, int &recursion_depth) {
 
   auto logger = spdlog::get(global_logger_name);
+  recursion_depth++;
+  // if (recursion_depth > 3) {
+  //   logger->warn("Recursion depth: {}", recursion_depth);
+  //   logger->warn("Current node: {}, Destination node: {}, "
+  //                "Previous direction: {}, Current cost: {}",
+  //                current, destination, previous_direction, current_cost);
+  //   logger->flush();
+  // }
 
   // Check recursion depth limit
   if (recursion_depth > MAX_RECURSE_CNT) {
     logger->warn("Recursion limit reached: current={}, destination={}, "
                  "previous_direction={}, recursion_depth={}",
                  current, destination, previous_direction, recursion_depth);
+    logger->flush();
     return std::make_pair(-1, false);
   }
 
@@ -245,11 +269,10 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
       if (next_domain_node != -1 && !visited[next_domain_node]) {
         // Recursively try to find a path from the next domain
         double link_cost = calcuDelay(current, next_domain_node);
-        const auto [final_cost, path_found] =
-            findPathRecursive(next_domain_node, destination, direction, visited,
-                              current_cost + link_cost, prefer_right,
-                              prefer_down, target_domain_i, target_domain_j,
-                              route_tables, recursion_depth + 1);
+        const auto [final_cost, path_found] = findPathRecursive(
+            next_domain_node, destination, direction, visited,
+            current_cost + link_cost, prefer_right, prefer_down,
+            target_domain_i, target_domain_j, route_tables, recursion_depth);
 
         // If path found, return the result
         if (path_found) {
@@ -260,18 +283,28 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
 
     // Process each border node in the chosen direction
     for (auto border_node : border_nodes_in_direction) {
-      // Skip the current node as we already processed it above
+      //   // Skip the current node as we already processed it above
       if (border_node == current) {
         continue;
       }
 
-      // Skip if route doesn't exist, link is banned, or node already visited
+      //   // Skip if route doesn't exist, link is banned, or node already
+      //   visited
       if (!route_tables[current][border_node] ||
           banned_links[border_node][direction] == 1 || visited[border_node]) {
         continue;
       }
 
-      // Calculate path cost to border node
+      int border_node_dmi = calculateDomainId(border_node);
+      if (border_node_dmi != current_domain_id) {
+        logger->error(
+            "Border node {} is not in the same domain as current node {}. "
+            "Current domain ID: {}, Border node domain ID: {}",
+            border_node, current, current_domain_id, border_node_dmi);
+        logger->flush();
+        exit(1);
+      }
+
       const auto [path_cost, success] =
           calcE2ePathWithinDomain(current, border_node, route_tables);
 
@@ -279,25 +312,29 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
         continue;
       }
 
-      // Find the node in the next domain
+      //   // Find the node in the next domain
       int next_domain_node = move(border_node, direction);
 
       if (next_domain_node == -1 || visited[next_domain_node]) {
         continue;
       }
 
-      // Recursively try to find a path from the next domain
+      // visited[next_domain_node] = true;
+      visited[border_node] = true;
+
+      //   // Recursively try to find a path from the next domain
       double new_cost =
           current_cost + path_cost + calcuDelay(border_node, next_domain_node);
       const auto [final_cost, path_found] = findPathRecursive(
           next_domain_node, destination, direction, visited, new_cost,
           prefer_right, prefer_down, target_domain_i, target_domain_j,
-          route_tables, recursion_depth + 1);
+          route_tables, recursion_depth);
 
       // If path found, return the result
       if (path_found) {
         return std::make_pair(final_cost, true);
       }
+      visited[border_node] = false;
     }
   }
   // Backtrack: mark current node as unvisited
@@ -336,9 +373,12 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
 
     bool prefer_right = 1, prefer_down = 1;
 
+    int recurse_cnt = 0;
+
     // 调用递归函数
     return findPathRecursive(src, dst, -1, visited, 0, prefer_right,
-                             prefer_down, I_dst, J_dst, route_tables, 0);
+                             prefer_down, I_dst, J_dst, route_tables,
+                             recurse_cnt);
   }
   printf(
       "Fail to find path from %d to %d in DomainHeuristicNode::calcE2ePath\n",

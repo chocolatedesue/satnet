@@ -238,6 +238,16 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
     }
 
     logger->info("Begin to calculate latency at time {}", cur_time);
+
+    // if (cur_time > 600 && cur_time < 1400) {
+    //   logger->info(
+    //       "Skip latency calculation at time {} because it is not in the "
+    //       "specified range",
+    //       cur_time);
+    //   logger->flush();
+    //   continue;
+    // }
+
     for (int i = 0; i < GlobalConfig::num_observers; i++) {
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
@@ -248,12 +258,12 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       //     (cur_time > 4201 && cur_time < 6100)) {
       //   std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
       // }
-      std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
 
+      std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
       logger->debug(
           "Calculate latency from {} to {}: {} ms, success: {} at time {}", src,
           dst, latency, success, cur_time);
-
+      logger->flush();
       if (success) {
         GlobalConfig::failure_rates[i].add(0);
         GlobalConfig::latency_results[i].add(latency);

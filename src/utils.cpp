@@ -60,6 +60,8 @@ void setup_logger() {
     std::cerr << "Log initialization failed: " << ex.what() << std::endl;
     exit(1);
   }
+
+  spdlog::flush_every(std::chrono::seconds(3));
 }
 
 const std::string global_logger_name = "satnet_logger";
@@ -233,7 +235,14 @@ int move(int u, int dir) {
     // do nothing
     return -1;
   }
-  return x * Q + y;
+
+  int res_id = x * Q + y;
+
+  if (res_id < 0 || res_id >= GlobalConfig::N) {
+    return -1;
+  }
+
+  return res_id;
 }
 
 int is_forwarder(int u) {
@@ -245,4 +254,4 @@ int is_forwarder(int u) {
   return banned_cnt > 1;
 }
 
-const int MAX_RECURSE_CNT = 1e4;
+const int MAX_RECURSE_CNT = 20;

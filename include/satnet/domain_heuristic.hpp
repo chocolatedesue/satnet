@@ -41,7 +41,7 @@ public:
   static std::pair<double, bool> findPathRecursive(
       int cur, int dst, int pre_dir, std::vector<bool> &visited, double val,
       bool prefer_right, bool prefer_down, int target_I, int target_J,
-      const std::vector<std::vector<int>> &route_tables, int recurse_cnt);
+      const std::vector<std::vector<int>> &route_tables, int& recurse_cnt);
 
   static double calculateHeuristicScoreWithDomain(int src, int dst);
 
