@@ -103,25 +103,40 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
   int val = 0;
   int cur = src;
   auto logger = spdlog::get(global_logger_name);
-  std::set<int> visited; // Changed from std::set<int> visited();
-  visited.insert(cur);
+  // std::set<int> visited; // Changed from std::set<int> visited();
+  // visited.insert(cur);
   // return std::make_pair(-1, false);
+  int cnt = 0;
   int cur_dmid = calculateDomainId(cur);
   while (cur != dst) {
+
+    cnt++;
+    if (cnt * Kp * Kn > 2 * GlobalConfig::N) {
+      // logger->error("Infinite loop detected in calcE2ePathWithinDomain");
+      // logger->flush();
+      return std::make_pair(-1, false);
+    }
     int nxt_dir = route_tables[cur][dst];
 
-    if (!nxt_dir) {
+    if (nxt_dir == -1) {
 
       return std::make_pair(-1, false);
     }
     int nxt = move(cur, nxt_dir);
     int nxt_dmid = calculateDomainId(nxt);
-    if (nxt == -1 || nxt_dmid != cur_dmid ||
-        GlobalConfig::cur_banned[cur][nxt_dir] || visited.count(nxt)) {
+    // if (nxt == -1 || nxt_dmid != cur_dmid ) {
 
+    //   return std::pair<double, bool>(-1, false);
+    // }
+    // visited.insert(nxt);
+
+    if (nxt == -1 || nxt_dmid != cur_dmid ||
+        GlobalConfig::cur_banned[cur][nxt_dir] == 1) {
+      // logger->error("Invalid move from {} to {} in direction {}", cur, nxt,
+      //               nxt_dir);
+      // logger->flush();
       return std::pair<double, bool>(-1, false);
     }
-    visited.insert(nxt);
 
     val += calcuDelay(cur, nxt);
     cur = nxt;
@@ -130,9 +145,8 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
 }
 
 template <int Kp, int Kn>
-double
-DomainHeuristicNode<Kp, Kn>::calcDomainHeuristicScore(int src_dmid,
-                                                               int dst_dmid) {
+double DomainHeuristicNode<Kp, Kn>::calcDomainHeuristicScore(int src_dmid,
+                                                             int dst_dmid) {
 
   // auto [I_s, J_s] = calcDomainCoords(src);
   // auto [I_d, J_d] = calcDomainCoords(dst);
@@ -238,8 +252,8 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
     }
 
     int next_domain_id = calculateDomainId(next_node);
-    double heuristic_score = calcDomainHeuristicScore(
-        next_domain_id, destination_domain_id);
+    double heuristic_score =
+        calcDomainHeuristicScore(next_domain_id, destination_domain_id);
     direction_scores[direction] = heuristic_score;
   }
 
@@ -377,8 +391,8 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
 
     // 调用递归函数
     return searchPathRecursively(src, dst, -1, visited, 0, prefer_right,
-                             prefer_down, I_dst, J_dst, route_tables,
-                             recurse_cnt);
+                                 prefer_down, I_dst, J_dst, route_tables,
+                                 recurse_cnt);
   }
   printf(
       "Fail to find path from %d to %d in DomainHeuristicNode::calcE2ePath\n",
