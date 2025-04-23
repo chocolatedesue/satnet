@@ -52,7 +52,7 @@ DomainHeuristicNode<Kp, Kn>::DomainHeuristicNode(int id)
 
 template <int Kp, int Kn>
 std::vector<std::vector<std::vector<short>>>
-DomainHeuristicNode<Kp, Kn>::createBorderNodes() {
+DomainHeuristicNode<Kp, Kn>::initializeBorderNodes() {
 
   // 1. Create the vector structure
   // Use std::max with an initializer list for clarity if Kp or Kn could be 0
@@ -131,7 +131,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePathWithinDomain(
 
 template <int Kp, int Kn>
 double
-DomainHeuristicNode<Kp, Kn>::calculateHeuristicScoreWithDomain(int src_dmid,
+DomainHeuristicNode<Kp, Kn>::calcDomainHeuristicScore(int src_dmid,
                                                                int dst_dmid) {
 
   // auto [I_s, J_s] = calcDomainCoords(src);
@@ -161,7 +161,7 @@ DomainHeuristicNode<Kp, Kn>::calculateHeuristicScoreWithDomain(int src_dmid,
 }
 
 template <int Kp, int Kn>
-std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
+std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
     int current, int destination, int previous_direction,
     std::vector<bool> &visited, double current_cost, bool prefer_right,
     bool prefer_down, int target_domain_i, int target_domain_j,
@@ -238,7 +238,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
     }
 
     int next_domain_id = calculateDomainId(next_node);
-    double heuristic_score = calculateHeuristicScoreWithDomain(
+    double heuristic_score = calcDomainHeuristicScore(
         next_domain_id, destination_domain_id);
     direction_scores[direction] = heuristic_score;
   }
@@ -269,7 +269,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
       if (next_domain_node != -1 && !visited[next_domain_node]) {
         // Recursively try to find a path from the next domain
         double link_cost = calcuDelay(current, next_domain_node);
-        const auto [final_cost, path_found] = findPathRecursive(
+        const auto [final_cost, path_found] = searchPathRecursively(
             next_domain_node, destination, direction, visited,
             current_cost + link_cost, prefer_right, prefer_down,
             target_domain_i, target_domain_j, route_tables, recursion_depth);
@@ -325,7 +325,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::findPathRecursive(
       //   // Recursively try to find a path from the next domain
       double new_cost =
           current_cost + path_cost + calcuDelay(border_node, next_domain_node);
-      const auto [final_cost, path_found] = findPathRecursive(
+      const auto [final_cost, path_found] = searchPathRecursively(
           next_domain_node, destination, direction, visited, new_cost,
           prefer_right, prefer_down, target_domain_i, target_domain_j,
           route_tables, recursion_depth);
@@ -376,7 +376,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::calcE2ePath(
     int recurse_cnt = 0;
 
     // 调用递归函数
-    return findPathRecursive(src, dst, -1, visited, 0, prefer_right,
+    return searchPathRecursively(src, dst, -1, visited, 0, prefer_right,
                              prefer_down, I_dst, J_dst, route_tables,
                              recurse_cnt);
   }
