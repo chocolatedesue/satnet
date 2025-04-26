@@ -171,7 +171,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_futr_banned() {
 
 // run method definition
 template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
-
+  int first_record = 0;
   cur_time = start_time;
   // cur_time = 600, duration = 900;
   run_start = std::chrono::steady_clock::now();
@@ -249,9 +249,10 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
     // }
 
     for (int i = 0; i < GlobalConfig::num_observers; i++) {
+
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
-      int latency = -1;
+      double latency = -1;
       bool success = false;
 
       // if (cur_time < 600 || (cur_time > 1201 && cur_time < 3600) ||
@@ -271,9 +272,24 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
         GlobalConfig::failure_rates[i].add(1);
         latency = -1;
       }
-
       if (latency != -1)
         GlobalConfig::latency_results[i].add(latency);
+      if (first_record == 0) {
+        first_record = 1;
+        auto graph_data_filename = report_dir + "/" +
+                                   std::string(typeid(T).name()) +
+                                   std::string(".csv");
+        auto fout = fopen(graph_data_filename.c_str(), "w");
+        fprintf(fout, "time,src,dst,latency\n");
+        fclose(fout);
+      } else {
+        auto graph_data_filename = report_dir + "/" +
+                                   std::string(typeid(T).name()) +
+                                   std::string(".csv");
+        auto fout = fopen(graph_data_filename.c_str(), "a");
+        fprintf(fout, "%d,%d,%d,%f\n", cur_time, src, dst, latency);
+        fclose(fout);
+      }
     }
   }
   report();
@@ -316,6 +332,21 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
 //   //   std::cout << "No path from " << src << " to " << dst << std::endl;
 //   // }
 //   return std::make_pair(latency, success);
+// }
+
+// template <DerivedFromBaseNode T>
+// void SpaceSimulation<DerivedFromBaseNode T>::save_graph_data() {
+//   auto graph_data_filename =
+//       report_dir + "/" + std::string(typeid(T).name()) + std::string(".csv");
+//       // time,latency,is_success
+//   auto fout = fopen(graph_data_filename.c_str(), "w");
+//   for (int i = 0; i < GlobalConfig::N; i++) {
+//     for (int j = 0; j < GlobalConfig::N; j++) {
+//       fprintf(fout, "%d ", route_tables[i][j]);
+//     }
+//     fprintf(fout, "\n");
+//   }
+//   fclose(fout);
 // }
 
 template <DerivedFromBaseNode T> void SpaceSimulation<T>::report() {
