@@ -1,11 +1,11 @@
 {
-    "name": "startlink-v2-group5-Jan-org",
+    "name": "startlink-v2-group4-Jan",
     "constellation": {
-        "num_of_orbit_planes": 28,
-        "num_of_satellites_per_plane": 120,
+        "num_of_orbit_planes": 72,
+        "num_of_satellites_per_plane": 22,
         "relative_spacing": 1,
-        "inclination": 43,
-        "altitude": 559
+        "inclination": 53,
+        "altitude": 540
     },
     
     "ISL_latency": {
@@ -22,10 +22,10 @@
     "num_latency_observers": 100,
     "random_seed": 17,
 
-    "isl_state_dir": "data/startlink-v2-group5/isl-sun-outage",
-    "sat_position_dir": "data/startlink-v2-group5/sat-geocentric-position",
-    "sat_lla_dir": "data/startlink-v2-group5/sat-subpoint-position",
-    "sat_velocity_dir": "data/startlink-v2-group5/sat-move-direction",
+    "isl_state_dir": "data/startlink-v2-group4-Jan/isl-sun-outage",
+    "sat_position_dir": "data/startlink-v2-group4-Jan/sat-geocentric-position",
+    "sat_lla_dir": "data/startlink-v2-group4-Jan/sat-subpoint-position",
+    "sat_velocity_dir": "data/startlink-v2-group4-Jan/sat-move-direction",
     "report_dir": "output",
     "observer_config_path": "data/observers.txt",
 
@@ -33,6 +33,6 @@
         "source": 103,
         "destination": 879,
         "frames_dir": "visualization/frame_data",
-        "scenario": "full startlink-v2-group5 - Route Table"
+        "scenario": "full startlink-v2-group4-Jan - Route Table"
     }
 }
