@@ -1,32 +1,124 @@
+#include <functional> // For std::function
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <string_view>
+
 #include <unordered_map>
 
+// --- Include all your algorithm headers here ---
 #include "satnet/base.hpp"
 #include "satnet/dijkstra.hpp"
 #include "satnet/domain_heuristic.hpp"
 #include "satnet/minhopcount.hpp"
 #include "satnet/space.hpp"
 #include "satnet/utils.hpp"
-// #include "spdlog/spdlog.h"
+// #include "spdlog/spdlog.h" // 假设 setup_logger() 在 utils.hpp 或其他地方定义
+// #include "path/to/your/new_algorithm.hpp" // Example for a new algorithm
 
-// Define algorithm IDs as enum class for type safety
+// Define algorithm IDs as enum class for type safety (Keep this)
 namespace satnet {
 enum class AlgorithmId {
-  BASE_NODE = 1000,
-  COIN_FLIP_PRED_NODE = 2003,
-  DIJKSTRA_PRED_NODE = 3003,
-  MIN_HOP_COUNT_NODE = 5001,
-  MIN_HOP_COUNT_PRED_NODE = 5002,
-  DOMAIN_HEURISTIC_NODE = 5100
+  // --- 1. 添加新的 Enum 值 ---
+  BASE_NODE = 1,
+  COIN_FLIP_PRED_NODE = 2, // 假设你有 CoinFlipPredNode.hpp
+  DIJKSTRA_PROBE_NODE = 100,
+  DIJKSTRA_PRED_NODE = 101,
+  MIN_HOP_COUNT_NODE = 150,
+  MIN_HOP_COUNT_PRED_NODE = 151,
+  DOMAIN_HEURISTIC_NODE_7_10 = 200,
+  DOMAIN_HEURISTIC_NODE_4_10 = 201,
+  DOMAIN_HEURISTIC_NODE_7_20 = 202,
+  DOMAIN_HEURISTIC_NODE_4_20 = 203,
+  // NEW_ALGORITHM_NODE = 6000, // Example for a new algorithm
 };
+} // namespace satnet
+
+// Template function to run simulation with specific node type (Keep this)
+template <typename NodeType> void runSimulation(const std::string &configFile) {
+  // 假设 SpaceSimulation 和 run() 定义在 satnet/space.hpp 或类似文件中
+  SpaceSimulation<NodeType>(configFile).run();
 }
 
-// Template function to run simulation with specific node type
-template <typename NodeType> void runSimulation(const std::string &configFile) {
-  SpaceSimulation<NodeType>(configFile).run();
+// Structure to hold algorithm information (Name and execution function)
+struct AlgorithmInfo {
+  std::string name;
+  std::function<void(const std::string &)>
+      runFunc; // Function takes config file path
+};
+
+// Function to get the central algorithm registry
+// Using a static map inside a function ensures safe initialization (Meyers'
+// Singleton)
+const std::unordered_map<satnet::AlgorithmId, AlgorithmInfo> &
+getAlgorithmRegistry() {
+  // --- 2. 在这里添加新算法的注册信息 ---
+  static const std::unordered_map<satnet::AlgorithmId, AlgorithmInfo> registry =
+      {
+          {satnet::AlgorithmId::BASE_NODE,
+           {
+               "BaseNode", // Display Name
+               [](const std::string &cfg) {
+                 runSimulation<BaseNode>(cfg);
+               } // Lambda calling runSimulation
+           }},
+        //   {satnet::AlgorithmId::COIN_FLIP_PRED_NODE,
+        //    {"CoinFlipPredNode",
+        //     [](const std::string &cfg) {
+        //       // runSimulation<CoinFlipPredNode>(cfg); // 假设存在
+        //       // CoinFlipPredNode 类型
+        //     }}},
+          {satnet::AlgorithmId::DIJKSTRA_PROBE_NODE,
+           {"DijkstraProbeNode",
+            [](const std::string &cfg) {
+              runSimulation<DijkstraProbeNode>(cfg);
+            }}},
+          {satnet::AlgorithmId::DIJKSTRA_PRED_NODE,
+           {"DijkstraPredNode",
+            [](const std::string &cfg) {
+              runSimulation<DijkstraPredNode>(cfg);
+            }}},
+          {satnet::AlgorithmId::MIN_HOP_COUNT_NODE,
+           {"MinHopCountNode",
+            [](const std::string &cfg) {
+              runSimulation<MinHopCountNode>(cfg);
+            }}},
+          {satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE,
+           {"MinHopCountPredNode",
+            [](const std::string &cfg) {
+              runSimulation<MinHopCountPredNode>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_7_10,
+           {"DomainHeuristicNode<7, 10>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<7, 10>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_4_10,
+           {"DomainHeuristicNode<4, 10>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<4, 10>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_7_20,
+           {"DomainHeuristicNode<7, 20>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<7, 20>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_4_20,
+           {
+
+               "DomainHeuristicNode<4, 20>",
+                [](const std::string &cfg) {
+                  runSimulation<DomainHeuristicNode<4, 20>>(cfg);
+                }
+
+               }}
+          /* Example for adding a new algorithm:
+          {satnet::AlgorithmId::NEW_ALGORITHM_NODE,
+           {"NewAlgorithmDisplayName",
+            [](const std::string& cfg){ runSimulation<NewAlgorithmNode>(cfg); }
+           }},
+          */
+      };
+  return registry;
 }
 
 int main(int argc, char **argv) {
@@ -37,63 +129,62 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  setup_logger();
+  setup_logger(); // Make sure this function is defined and available
 
   // Parse command-line arguments
   const std::string configFileName(argv[1]);
-  const int algorithmId = std::stoi(argv[2]);
+  int algorithmIdInt = 0;
+  try {
+    algorithmIdInt = std::stoi(argv[2]);
+  } catch (const std::invalid_argument &e) {
+    std::cerr << "Error: Invalid algorithm ID format '" << argv[2]
+              << "'. Must be an integer." << std::endl;
+    return EXIT_FAILURE;
+  } catch (const std::out_of_range &e) {
+    std::cerr << "Error: Algorithm ID '" << argv[2]
+              << "' is out of range for integer." << std::endl;
+    return EXIT_FAILURE;
+  }
 
-  // Map algorithm IDs to their names for display purposes
-  const std::unordered_map<int, std::string> algorithmNames = {
-      {static_cast<int>(satnet::AlgorithmId::BASE_NODE), "BaseNode"},
-      {static_cast<int>(satnet::AlgorithmId::COIN_FLIP_PRED_NODE),
-       "CoinFlipPredNode"},
-      {static_cast<int>(satnet::AlgorithmId::DIJKSTRA_PRED_NODE),
-       "DijkstraPredNode"},
-      {static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_NODE),
-       "MinHopCountNode"},
-      {static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE),
-       "DomainHeuristicNode<7, 10>"},
-      {static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE),
-       "MinHopCountPredNode"},
-  };
+  // Cast the integer ID to the enum type for map lookup
+  const auto algorithmId = static_cast<satnet::AlgorithmId>(algorithmIdInt);
+  const auto &registry = getAlgorithmRegistry();
 
   try {
-    // Display selected algorithm
-    std::cout << "Algorithm ID: " << algorithmId
-              << ", Algorithm Name: " << algorithmNames.at(algorithmId)
-              << std::endl;
+    // Find the algorithm in the registry
+    auto it = registry.find(algorithmId);
 
-    // Run appropriate simulation based on algorithm ID
-    switch (algorithmId) {
-    case static_cast<int>(satnet::AlgorithmId::BASE_NODE):
-      runSimulation<BaseNode>(configFileName);
-      break;
-
-    case static_cast<int>(satnet::AlgorithmId::DIJKSTRA_PRED_NODE):
-      runSimulation<DijkstraPredNode>(configFileName);
-      break;
-
-    case static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_NODE):
-      runSimulation<MinHopCountNode>(configFileName);
-      break;
-
-    case static_cast<int>(satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE):
-      runSimulation<MinHopCountPredNode>(configFileName);
-      break;
-    case static_cast<int>(satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE):
-      runSimulation<DomainHeuristicNode<7, 10>>(configFileName);
-      break;
-    // Add other algorithm cases here
-    default:
-      std::cerr << "Invalid algorithm ID: " << algorithmId << std::endl;
-      return EXIT_FAILURE;
+    // Check if the algorithm ID exists in the registry
+    if (it == registry.end()) {
+      // Use the original integer ID for the error message as the enum cast
+      // might be invalid
+      throw std::out_of_range("Unknown or invalid algorithm ID: " +
+                              std::to_string(algorithmIdInt));
     }
-  } catch (const std::out_of_range &) {
-    std::cerr << "Unknown algorithm ID: " << algorithmId << std::endl;
+
+    // Get the AlgorithmInfo (name and run function)
+    const auto &info = it->second;
+
+    // Display selected algorithm
+    std::cout << "Algorithm ID: " << algorithmIdInt
+              << ", Algorithm Name: " << info.name << std::endl;
+
+    // --- 3. 无需修改这里 ---
+    // Run the appropriate simulation using the stored function object
+    info.runFunc(configFileName);
+
+  } catch (
+      const std::out_of_range &e) { // Catches map::at or our thrown exception
+    std::cerr << "Error: " << e.what() << std::endl;
+    // Optionally print available algorithms
+    std::cerr << "Available algorithm IDs:" << std::endl;
+    for (const auto &pair : registry) {
+      std::cerr << "  " << static_cast<int>(pair.first) << ": "
+                << pair.second.name << std::endl;
+    }
     return EXIT_FAILURE;
   } catch (const std::exception &e) {
-    std::cerr << "Error: " << e.what() << std::endl;
+    std::cerr << "Runtime Error: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
 

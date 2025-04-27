@@ -171,7 +171,24 @@ double DomainHeuristicNode<Kp, Kn>::calcDomainHeuristicScore(int src_dmid,
   //     std::min(std::abs(p_s - p_d + GlobalConfig::P) % GlobalConfig::P,
   //              std::abs(p_d - p_s + GlobalConfig::P) % GlobalConfig::P);
 
-  return -(vertical_dist + horizontal_dist);
+  return static_cast<double>(-(vertical_dist * 4 + horizontal_dist));
+}
+
+template <int Kp, int Kn>
+double DomainHeuristicNode<Kp, Kn>::calcEdgeNodeHeuristicScore(int src,
+                                                               int dst) {
+  int n_s = src % GlobalConfig::Q, p_s = src / GlobalConfig::Q;
+  int n_d = dst % GlobalConfig::Q, p_d = dst / GlobalConfig::Q;
+
+  int vertical_dist =
+      std::min(std::abs(n_s - n_d + GlobalConfig::Q) % GlobalConfig::Q,
+               std::abs(n_d - n_s + GlobalConfig::Q) % GlobalConfig::Q);
+
+  int horizontal_dist =
+      std::min(std::abs(p_s - p_d + GlobalConfig::P) % GlobalConfig::P,
+               std::abs(p_d - p_s + GlobalConfig::P) % GlobalConfig::P);
+
+  return static_cast<double>(-(vertical_dist * 4 + horizontal_dist));
 }
 
 template <int Kp, int Kn>
@@ -200,7 +217,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
     return std::make_pair(-1, false);
   }
 
-  const auto &banned_links = GlobalConfig::futr_banned;
+  const auto &banned_links = GlobalConfig::cur_banned;
 
   // Base case: we've reached the destination
   if (current == destination) {
@@ -269,7 +286,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
   // Try each direction in order of preference
   for (const auto &[direction, score] : sorted_directions) {
     // First check if the current node itself is a border node in this direction
-    const auto &border_nodes_in_direction =
+    auto border_nodes_in_direction =
         border_nodes[current_domain_id][direction];
     bool is_current_border_node =
         std::find(border_nodes_in_direction.begin(),
@@ -294,6 +311,16 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
         }
       }
     }
+    // auto self = this; // <--- 移除这一行
+
+    sort(border_nodes_in_direction.begin(), border_nodes_in_direction.end(),
+         [destination](int a, int b) { // <--- 移除 self 捕获
+           // 使用类名:: 方式调用 static 函数
+           return DomainHeuristicNode<Kp, Kn>::calcEdgeNodeHeuristicScore(
+                      a, destination) >
+                  DomainHeuristicNode<Kp, Kn>::calcEdgeNodeHeuristicScore(
+                      b, destination);
+         });
 
     // Process each border node in the chosen direction
     for (auto border_node : border_nodes_in_direction) {
@@ -420,7 +447,7 @@ DomainHeuristicNode<Kp, Kn>::calcDomainCoords(int satelliteId) {
 
 template <int Kp, int Kn> std::string DomainHeuristicNode<Kp, Kn>::getName() {
   // Simple override
-  return "DomainHeuristicNode";
+  return "DomainHeuristic_" + std::to_string(Kp) + "_" + std::to_string(Kn);
 }
 
 template <int Kp, int Kn>
@@ -435,7 +462,7 @@ int DomainHeuristicNode<Kp, Kn>::calculateDomainId(int satelliteId) {
 template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
 
   const auto &banned =
-      GlobalConfig::futr_banned; // Assuming pointer access is correct
+      GlobalConfig::cur_banned; // Assuming pointer access is correct
 
   // Reset state for this computation run
   std::fill(vis.begin(), vis.end(), -1);

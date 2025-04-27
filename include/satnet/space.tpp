@@ -48,26 +48,25 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
   } else {
     start_time = 0;
   }
-
+  config_name = config["name"];
   isl_state_dir = config["isl_state_dir"];
   sat_pos_dir = config["sat_position_dir"];
   sat_vel_dir = config["sat_velocity_dir"];
-  report_dir = config["report_dir"].get<std::string>();
+  
+  
+  std::string report_dir_str = config["report_dir"].get<std::string>();
+  // std::string config_name = config["name"];
 
-  fs::path report_dir_path(report_dir);
-  std::error_code ec;
+  fs::path target_dir_path = fs::path(report_dir_str) / config_name;
 
-  // 尝试创建目录，如果已存在则返回 false，出错则设置 ec
-  bool created = fs::create_directories(report_dir_path, ec);
+  fs::create_directories(target_dir_path.parent_path());
+  fs::create_directories(target_dir_path);
 
-  if (!ec) {
-    if (created) {
-      std::cout << "report_dir: " << report_dir_path.string() << " created\n";
-    } else {
-      std::cout << "report_dir: " << report_dir_path.string()
-                << " already exists\n";
-    }
-  }
+  
+
+  report_dir = target_dir_path.string();
+
+
   seed = 42;
   srand(seed);
 
@@ -171,7 +170,10 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_futr_banned() {
 
 // run method definition
 template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
-  int first_record = 0;
+
+  auto logger = spdlog::get(global_logger_name);
+  logger->info("Simulation started with config: {}", config_file_name);
+  int first_record = 0, is_specical_cal = 0;
   cur_time = start_time;
   // cur_time = 600, duration = 900;
   run_start = std::chrono::steady_clock::now();
@@ -182,7 +184,13 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
     load_sat_lla();
     // load_sat_vel();
 
-    if (cur_time % update_period == 0) {
+    if (cur_time % update_period == 0 ||
+        algorithm_name == "DomainHeuristicNode") {
+
+      if (!is_specical_cal && cur_time % update_period != 0) {
+        is_specical_cal = 1;
+        logger->info("Special Calc for DomainHeuristicNode\n");
+      }
       load_futr_banned();
       // 替换注释掉的聚合代码
       double total_compute_time = 0.0;
@@ -228,8 +236,6 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       }
     }
 
-    auto logger = spdlog::get(global_logger_name);
-
     if (cur_time % refresh_period == 0) {
 
       logger->info("Begin to report at time {}", cur_time);
@@ -274,21 +280,21 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       }
       if (latency != -1)
         GlobalConfig::latency_results[i].add(latency);
-      if (first_record == 0) {
-        first_record = 1;
-        auto graph_data_filename = report_dir + "/" +
-                                   std::string(typeid(T).name()) +
-                                   std::string(".csv");
-        auto fout = fopen(graph_data_filename.c_str(), "w");
-        fprintf(fout, "time,src,dst,latency\n");
-        fclose(fout);
-      } else {
-        auto graph_data_filename = report_dir + "/" +
-                                   std::string(typeid(T).name()) +
-                                   std::string(".csv");
-        auto fout = fopen(graph_data_filename.c_str(), "a");
-        fprintf(fout, "%d,%d,%d,%f\n", cur_time, src, dst, latency);
-        fclose(fout);
+      if (i < 10) {
+        if (first_record == 0) {
+          first_record = 1;
+          auto graph_data_filename =
+              report_dir + "/" + algorithm_name + std::string(".csv");
+          auto fout = fopen(graph_data_filename.c_str(), "w");
+          fprintf(fout, "time,src,dst,latency\n");
+          fclose(fout);
+        } else {
+          auto graph_data_filename =
+              report_dir + "/" + algorithm_name + std::string(".csv");
+          auto fout = fopen(graph_data_filename.c_str(), "a");
+          fprintf(fout, "%d,%d,%d,%f\n", cur_time, src, dst, latency);
+          fclose(fout);
+        }
       }
     }
   }

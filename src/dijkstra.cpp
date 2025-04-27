@@ -1,8 +1,10 @@
 #include "satnet/dijkstra.hpp"
 #include "satnet/utils.hpp" // 包含对应的头文件
 #include <cmath>
+#include <cstdlib>
 #include <limits>
 #include <queue>
+#include "spdlog/spdlog.h"
 #include <stdexcept>
 
 // Note: Assumes N, GlobalConfig::sat_pos, move, cur_banned, futr_banned,
@@ -86,9 +88,11 @@ DijkstraProbeNode::DijkstraProbeNode(int id) : DijkstraNode(id) {}
 std::string DijkstraProbeNode::getName() { return "DijkstraProbe"; }
 
 void DijkstraProbeNode::compute() {
+  auto logger = spdlog::get(global_logger_name);
   if (!cur_banned) {
-    DijkstraNode::compute(); // Fallback if no banned data
-    return;
+
+    logger->warn("Current banned data available");
+    exit(1);
   }
   computeWithBannedPorts(cur_banned);
 }
@@ -151,9 +155,11 @@ DijkstraPredNode::DijkstraPredNode(int id) : DijkstraProbeNode(id) {}
 std::string DijkstraPredNode::getName() { return "DijkstraPred"; }
 
 void DijkstraPredNode::compute() {
+  auto logger = spdlog::get(global_logger_name);
   if (!futr_banned) {
-    DijkstraNode::compute(); // Fallback
-    return;
+    // DijkstraNode::compute(); // Fallback
+    logger->warn("No future banned data available");
+    exit(1);
   }
   // Reuses probe logic with future banned data
   computeWithBannedPorts(futr_banned);

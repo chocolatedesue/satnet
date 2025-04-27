@@ -47,6 +47,8 @@ public:
 
   static std::vector<std::vector<std::vector<short>>> initializeBorderNodes();
 
+  static double calcEdgeNodeHeuristicScore(int src, int dst);
+
   // inline static const int domainMove(int cur_dmi, int dir) {
   //   int x = cur_dmi / Kn, y = cur_dmi % Kn;
 
