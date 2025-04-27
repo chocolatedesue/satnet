@@ -29,6 +29,11 @@ enum class AlgorithmId {
   DOMAIN_HEURISTIC_NODE_4_10 = 201,
   DOMAIN_HEURISTIC_NODE_7_20 = 202,
   DOMAIN_HEURISTIC_NODE_4_20 = 203,
+  DOMAIN_HEURISTIC_NODE_4_2 = 204,
+  // {AlgorithmId::NEW_ALGORITHM_NODE, {"NewAlgorithm", runNewAlgorithm}},
+  // Add more algorithms as needed
+  // Example for a new algorithm:
+  // {AlgorithmId::NEW_ALGORITHM_NODE, {"NewAlgorithm", runNewAlgorithm}},
   // NEW_ALGORITHM_NODE = 6000, // Example for a new algorithm
 };
 } // namespace satnet
@@ -61,12 +66,12 @@ getAlgorithmRegistry() {
                  runSimulation<BaseNode>(cfg);
                } // Lambda calling runSimulation
            }},
-        //   {satnet::AlgorithmId::COIN_FLIP_PRED_NODE,
-        //    {"CoinFlipPredNode",
-        //     [](const std::string &cfg) {
-        //       // runSimulation<CoinFlipPredNode>(cfg); // 假设存在
-        //       // CoinFlipPredNode 类型
-        //     }}},
+          //   {satnet::AlgorithmId::COIN_FLIP_PRED_NODE,
+          //    {"CoinFlipPredNode",
+          //     [](const std::string &cfg) {
+          //       // runSimulation<CoinFlipPredNode>(cfg); // 假设存在
+          //       // CoinFlipPredNode 类型
+          //     }}},
           {satnet::AlgorithmId::DIJKSTRA_PROBE_NODE,
            {"DijkstraProbeNode",
             [](const std::string &cfg) {
@@ -106,11 +111,17 @@ getAlgorithmRegistry() {
            {
 
                "DomainHeuristicNode<4, 20>",
-                [](const std::string &cfg) {
-                  runSimulation<DomainHeuristicNode<4, 20>>(cfg);
-                }
+               [](const std::string &cfg) {
+                 runSimulation<DomainHeuristicNode<4, 20>>(cfg);
+               }
 
-               }}
+           }},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_4_2,
+           {"DomainHeuristicNode<4, 2>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<4, 2>>(cfg);
+            }}},
+
           /* Example for adding a new algorithm:
           {satnet::AlgorithmId::NEW_ALGORITHM_NODE,
            {"NewAlgorithmDisplayName",

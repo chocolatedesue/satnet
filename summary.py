@@ -16,7 +16,7 @@ import re # Import re for potentially more robust parsing if needed, though spli
 # (Keep the configuration section as defined in the previous good version)
 # =============================================================================
 # --- Input/Output Directories and Files ---
-REPORT_DIRECTORY = Path("output/startlink-v2-group5-Jan")
+REPORT_DIRECTORY = Path("output/startlink-v2-group4-April")
 OUTPUT_PLOT_DIRECTORY = REPORT_DIRECTORY / "plot_data"
 REPORT_FILE_SUFFIX = ".txt"
 REPORT_FILE_PREFIX = "report"
@@ -24,7 +24,7 @@ SUMMARY_REPORT_FILENAME_TEMPLATE = "summary [{target_name}].csv"
 LATENCY_CDF_FILENAME_TEMPLATE = "{safe_algo_name}_latency_cdf.csv"
 
 # --- Target Scenarios ---
-TARGET_LIST = ["startlink-v2-group5-Apr","startlink-v2-group5-Jan", "startlink-v2-group4-Jan"]
+TARGET_LIST = ["startlink-v2-group5-Apr","startlink-v2-group5-Jan", "startlink-v2-group4-Jan", "startlink-v2-group4-April"]
 
 # --- Algorithm Identification and Mapping ---
 ALGORITHM_ID_MAP: Dict[str, int] = {
