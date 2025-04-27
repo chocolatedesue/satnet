@@ -24,7 +24,7 @@ SUMMARY_REPORT_FILENAME_TEMPLATE = "summary [{target_name}].csv"
 LATENCY_CDF_FILENAME_TEMPLATE = "{safe_algo_name}_latency_cdf.csv"
 
 # --- Target Scenarios ---
-TARGET_LIST = ["startlink-v2-group5-Apr","startlink-v2-group5-Jan", ""]
+TARGET_LIST = ["startlink-v2-group5-Apr","startlink-v2-group5-Jan", "startlink-v2-group4-Jan"]
 
 # --- Algorithm Identification and Mapping ---
 ALGORITHM_ID_MAP: Dict[str, int] = {
