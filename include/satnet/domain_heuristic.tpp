@@ -459,19 +459,20 @@ int DomainHeuristicNode<Kp, Kn>::calculateDomainId(int satelliteId) {
 }
 
 template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
+  for (int i = 0; i < GlobalConfig::N; ++i) {
+    route_table[i] = 0; // Initialize route_table
+    vis[i] = 0;
+  }
 
   const auto &banned =
       GlobalConfig::cur_banned; // Assuming pointer access is correct
-
-  // Reset state for this computation run
-  std::fill(vis.begin(), vis.end(), -1);
 
   auto logger = spdlog::get(global_logger_name);
 
   std::queue<int> q;
 
   q.push(id);
-  vis[id] = 0;
+  vis[id] = 1;
 
   int current_domain_id = calculateDomainId(id); // Calculate only once per node
   while (!q.empty()) {
@@ -496,10 +497,21 @@ template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
       }
 
       // Standard BFS check: if neighbor not visited yet
-      if (vis[nxt] == -1) {
+      if (vis[nxt] == 0) {
         vis[nxt] = vis[cur] + 1;
-        route_table[nxt] = direction; // Store predecessor in route_table
+        // route_table[nxt] = direction; // Store predecessor in route_table
         q.push(nxt);
+      }
+
+      if (this->vis[nxt] == this->vis[cur] + 1) {
+
+        int first_direction =
+            (cur == this->id) ? direction : this->route_table[cur];
+
+        if (this->route_table[nxt] == 0 ||
+            first_direction < this->route_table[nxt]) {
+          this->route_table[nxt] = first_direction;
+        }
       }
     }
   }

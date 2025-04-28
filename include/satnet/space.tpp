@@ -175,7 +175,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
   run_start = std::chrono::steady_clock::now();
   bool is_sp_update =
       algorithm_name.find("DomainHeuristic") != std::string::npos;
-
+  // is_sp_update = true;
   for (; cur_time < start_time + duration; cur_time += step) {
     load_cur_banned();
     load_sat_pos();
@@ -186,7 +186,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
 
       if (!is_specical_cal && cur_time % update_period != 0) {
         is_specical_cal = 1;
-        logger->warn("Special Calc for DomainHeuristic algorithm\n");
+        logger->warn("Special full update enabled mode\n");
       }
       load_futr_banned();
       // 替换注释掉的聚合代码

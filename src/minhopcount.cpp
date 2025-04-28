@@ -64,30 +64,14 @@ void MinHopCountNode::compute() {
   }
 }
 
+// MinHopCountProbNode
 
-// class MinHopCountPredNode : public BaseNode {
-//   public:
-//     // Constructor Declaration
-//     MinHopCountPredNode(int id);
-  
-//     // Method Declarations
-//     std::string getName() override;
-//     void compute() override;
-//     std::vector<int> vis; // Visited flags (size N)
-//   };
-  
+MinHopCountProbNode::MinHopCountProbNode(int id)
+    : BaseNode(id), vis(GlobalConfig::N) {}
 
-MinHopCountPredNode::MinHopCountPredNode(int id): BaseNode(id), vis(GlobalConfig::N) {
-  // Constructor implementation (if needed)
-}
-
-// getName Method Definition
-std::string MinHopCountPredNode::getName() { return "MinHopCountPred"; }
-
-// compute Method Definition
-void MinHopCountPredNode::compute() {
-  const auto &banned = GlobalConfig::futr_banned;
-  
+void MinHopCountProbNode::computeWithBannedPorts(
+    const std::vector<std::array<int, 5>> *banned_ptr) {
+  const auto &banned = *banned_ptr;
   // Initialize visited and route_table arrays
 
   for (int i = 0; i < GlobalConfig::N; ++i) { // Using this->N explicitly
@@ -115,7 +99,7 @@ void MinHopCountPredNode::compute() {
       // Calculate the neighbor node v
       // Use this->move explicitly if needed
       int v = move(u, direction);
-      
+
       // If neighbor v hasn't been visited yet
       if (this->vis[v] == 0) {
         this->vis[v] = this->vis[u] + 1; // Set distance/hop count
@@ -142,5 +126,25 @@ void MinHopCountPredNode::compute() {
       }
     }
   }
+}
+
+std::string MinHopCountProbNode::getName() { return "MinHopCountProb"; }
+
+void MinHopCountProbNode::compute() {
+  computeWithBannedPorts(&GlobalConfig::cur_banned);
+}
+
+// MinHopCountPredNode
+
+MinHopCountPredNode::MinHopCountPredNode(int id) : MinHopCountProbNode(id) {
+  // Constructor implementation (if needed)
+}
+
+// getName Method Definition
+std::string MinHopCountPredNode::getName() { return "MinHopCountPred"; }
+
+// compute Method Definition
+void MinHopCountPredNode::compute() {
+  computeWithBannedPorts(&GlobalConfig::futr_banned); // Use future banned ports
 }
 // The MinHopCountPredNode class is similar to MinHopCountNode but

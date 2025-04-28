@@ -15,7 +15,25 @@ public:
   std::vector<int> vis; // Visited flags (size N)
 };
 
-class MinHopCountPredNode : public BaseNode {
+// class DijkstraProbeNode
+
+class MinHopCountProbNode : public BaseNode {
+protected:
+  // Compute routes avoiding specific ports
+  void
+  computeWithBannedPorts(const std::vector<std::array<int, 5>> *banned_ptr);
+
+public:
+  MinHopCountProbNode(int id);
+  virtual ~MinHopCountProbNode() = default;
+
+  virtual std::string getName() override;
+  // Compute routes using current banned ports (cur_banned)
+  virtual void compute() override;
+  std::vector<int> vis; // Visited flags (size N)
+};
+
+class MinHopCountPredNode : public MinHopCountProbNode {
 public:
   // Constructor Declaration
   MinHopCountPredNode(int id);

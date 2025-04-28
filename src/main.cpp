@@ -24,7 +24,8 @@ enum class AlgorithmId {
   DIJKSTRA_PROBE_NODE = 100,
   DIJKSTRA_PRED_NODE = 101,
   MIN_HOP_COUNT_NODE = 150,
-  MIN_HOP_COUNT_PRED_NODE = 151,
+  MIN_HOP_COUNT_PROBE_NODE = 151,
+  MIN_HOP_COUNT_PRED_NODE = 152,
   DOMAIN_HEURISTIC_NODE_7_10 = 200,
   DOMAIN_HEURISTIC_NODE_4_10 = 201,
   DOMAIN_HEURISTIC_NODE_7_20 = 202,
@@ -93,6 +94,13 @@ getAlgorithmRegistry() {
             [](const std::string &cfg) {
               runSimulation<MinHopCountNode>(cfg);
             }}},
+          {satnet::AlgorithmId::MIN_HOP_COUNT_PROBE_NODE,
+
+           {"MinHopCountProbeNode",
+            [](const std::string &cfg) {
+              runSimulation<MinHopCountProbNode>(cfg);
+            }}},
+
           {satnet::AlgorithmId::MIN_HOP_COUNT_PRED_NODE,
            {"MinHopCountPredNode",
             [](const std::string &cfg) {
@@ -148,9 +156,9 @@ getAlgorithmRegistry() {
           {
               satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_2_1,
               {"DomainHeuristicNode<2, 1>",
-                [](const std::string &cfg) {
-                  runSimulation<DomainHeuristicNode<2, 1>>(cfg);
-                }},
+               [](const std::string &cfg) {
+                 runSimulation<DomainHeuristicNode<2, 1>>(cfg);
+               }},
           },
           {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_1_1,
            {"DomainHeuristicNode<1, 1>",

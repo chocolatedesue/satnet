@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cmath> // 因为 getDist 使用了 sqrt
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <limits>     // 可选：用于返回无穷大等
@@ -211,6 +212,17 @@ int getPort(int u, int v, int &u_port, int &v_port) {
 
 int move(int u, int dir) {
   using namespace GlobalConfig;
+
+  if (Q == 0 || P == 0 || N == 0) {
+    auto logger = spdlog::get(global_logger_name);
+    if (logger) {
+      logger->error("GlobalConfig variables are not initialized properly.");
+    } else {
+      std::cerr << "GlobalConfig variables are not initialized properly."
+                << std::endl;
+    }
+    exit(1);
+  }
   int x = u / Q;
   int y = u % Q;
   if (dir == 1) {
