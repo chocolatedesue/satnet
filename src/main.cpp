@@ -30,6 +30,12 @@ enum class AlgorithmId {
   DOMAIN_HEURISTIC_NODE_7_20 = 202,
   DOMAIN_HEURISTIC_NODE_4_20 = 203,
   DOMAIN_HEURISTIC_NODE_4_2 = 204,
+  DOMAIN_HEURISTIC_NODE_2_2 = 205,
+  DOMAIN_HEURISTIC_NODE_14_60 = 206,
+  DOMAIN_HEURISTIC_NODE_1_2 = 207,
+  DOMAIN_HEURISTIC_NODE_2_1 = 208,
+  DOMAIN_HEURISTIC_NODE_1_1 = 209,
+
   // {AlgorithmId::NEW_ALGORITHM_NODE, {"NewAlgorithm", runNewAlgorithm}},
   // Add more algorithms as needed
   // Example for a new algorithm:
@@ -120,6 +126,36 @@ getAlgorithmRegistry() {
            {"DomainHeuristicNode<4, 2>",
             [](const std::string &cfg) {
               runSimulation<DomainHeuristicNode<4, 2>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_2_2,
+           {"DomainHeuristicNode<2, 2>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<2, 2>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_14_60,
+           {"DomainHeuristicNode<14, 60>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<14, 60>>(cfg);
+            }}},
+
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_1_2,
+
+           {"DomainHeuristicNode<1, 2>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<1, 2>>(cfg);
+            }}},
+
+          {
+              satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_2_1,
+              {"DomainHeuristicNode<2, 1>",
+                [](const std::string &cfg) {
+                  runSimulation<DomainHeuristicNode<2, 1>>(cfg);
+                }},
+          },
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_1_1,
+           {"DomainHeuristicNode<1, 1>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<1, 1>>(cfg);
             }}},
 
           /* Example for adding a new algorithm:

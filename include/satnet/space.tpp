@@ -52,8 +52,7 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
   isl_state_dir = config["isl_state_dir"];
   sat_pos_dir = config["sat_position_dir"];
   sat_vel_dir = config["sat_velocity_dir"];
-  
-  
+
   std::string report_dir_str = config["report_dir"].get<std::string>();
   // std::string config_name = config["name"];
 
@@ -62,10 +61,7 @@ SpaceSimulation<T>::SpaceSimulation(const std::string &config_path)
   fs::create_directories(target_dir_path.parent_path());
   fs::create_directories(target_dir_path);
 
-  
-
   report_dir = target_dir_path.string();
-
 
   seed = 42;
   srand(seed);
@@ -177,6 +173,8 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
   cur_time = start_time;
   // cur_time = 600, duration = 900;
   run_start = std::chrono::steady_clock::now();
+  bool is_sp_update =
+      algorithm_name.find("DomainHeuristic") != std::string::npos;
 
   for (; cur_time < start_time + duration; cur_time += step) {
     load_cur_banned();
@@ -184,12 +182,11 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
     load_sat_lla();
     // load_sat_vel();
 
-    if (cur_time % update_period == 0 ||
-        algorithm_name == "DomainHeuristicNode") {
+    if (cur_time % update_period == 0 || is_sp_update) {
 
       if (!is_specical_cal && cur_time % update_period != 0) {
         is_specical_cal = 1;
-        logger->info("Special Calc for DomainHeuristicNode\n");
+        logger->warn("Special Calc for DomainHeuristic algorithm\n");
       }
       load_futr_banned();
       // 替换注释掉的聚合代码
@@ -201,10 +198,13 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
         auto &node = nodes[i];
         auto &cur_table = route_tables[i];
 
-        auto compute_start = clock();
+        auto compute_start = std::chrono::high_resolution_clock::now();
         node->compute();
-        auto elapsed_s = (clock() - compute_start) * 1.0 / CLOCKS_PER_SEC;
-        auto elapsed_ms = elapsed_s * 1000;
+        auto compute_end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
+            compute_end - compute_start);
+        auto elapsed_ms =
+            elapsed.count() / 1000.0; // Convert microseconds to milliseconds
         total_compute_time += elapsed_ms;
 
         auto &new_table = node->getRouteTable();
@@ -216,21 +216,14 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
             diff++;
           }
         }
-        if (cur_time != 0) {
+        if (cur_time != start_time) {
           total_diff_count += diff;
         }
-
-        // #pragma omp critical
-        // {
-        //     if(dump_rib[i]) {
-        //         save_rib(cur_table, i);
-        //     }
-        // }
       }
 
       // 单次添加汇总数据，避免循环
       compute_time_result.add(total_compute_time / GlobalConfig::N);
-      if (cur_time != 0) {
+      if (cur_time != start_time) {
         update_entry_result.add(static_cast<double>(total_diff_count) /
                                 GlobalConfig::N);
       }

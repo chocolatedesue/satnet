@@ -286,8 +286,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
   // Try each direction in order of preference
   for (const auto &[direction, score] : sorted_directions) {
     // First check if the current node itself is a border node in this direction
-    auto border_nodes_in_direction =
-        border_nodes[current_domain_id][direction];
+    auto border_nodes_in_direction = border_nodes[current_domain_id][direction];
     bool is_current_border_node =
         std::find(border_nodes_in_direction.begin(),
                   border_nodes_in_direction.end(),
@@ -472,17 +471,12 @@ template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
   std::queue<int> q;
 
   q.push(id);
+  vis[id] = 0;
 
-  if (id == 119) {
-    logger->debug("Start to calc intra routing in node {}", id);
-  }
-
+  int current_domain_id = calculateDomainId(id); // Calculate only once per node
   while (!q.empty()) {
     int cur = q.front();
     q.pop();
-
-    int current_domain_id =
-        calculateDomainId(cur); // Calculate only once per node
 
     for (int direction = 1; direction <= 4;
          ++direction) { // Loop directions 1 to 4
