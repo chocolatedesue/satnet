@@ -14,7 +14,7 @@
     },
     "duration": 6600,
     "step_length": 10,
-    "update_period": 60,
+    "update_period": 30,
     "refresh_period": 600,
     "num_latency_observers": 100,
     "random_seed": 17,
