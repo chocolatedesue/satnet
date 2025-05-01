@@ -255,7 +255,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
   // Evaluate each possible direction (1=up, 2=right, 3=down, 4=left)
   for (int direction = 1; direction <= 4; direction++) {
     // Skip if no border nodes in this direction
-    if (border_nodes[current_domain_id][direction].empty()) {
+    if (border_nodes[current_domain_id][direction].empty() || banned_links[current][direction] == 1) {
       continue;
     }
 
@@ -459,7 +459,13 @@ int DomainHeuristicNode<Kp, Kn>::calculateDomainId(int satelliteId) {
 }
 
 template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
+
+  int current_domain_id = calculateDomainId(id); // Calculate only once per node
   for (int i = 0; i < GlobalConfig::N; ++i) {
+    // int node_dm_id = calculateDomainId(i);
+    // if (node_dm_id != current_domain_id) {
+    //   continue; // Skip nodes in different domains
+    // }
     route_table[i] = 0; // Initialize route_table
     vis[i] = 0;
   }
@@ -474,7 +480,6 @@ template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
   q.push(id);
   vis[id] = 1;
 
-  int current_domain_id = calculateDomainId(id); // Calculate only once per node
   while (!q.empty()) {
     int cur = q.front();
     q.pop();
@@ -492,15 +497,21 @@ template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
       int nxt = move(cur, direction); // Get neighbor
 
       // Check if the neighbor is in the same domain
-      if (calculateDomainId(nxt) != current_domain_id) {
-        continue; // Skip neighbors in different domains
+      // if (calculateDomainId(nxt) != current_domain_id) {
+      //   continue; // Skip neighbors in different domains
+      // }
+      int nxt_dm_id = calculateDomainId(nxt);
+
+      if (nxt == -1) {
+        continue; // Skip invalid moves or different domains
       }
 
       // Standard BFS check: if neighbor not visited yet
       if (vis[nxt] == 0) {
         vis[nxt] = vis[cur] + 1;
         // route_table[nxt] = direction; // Store predecessor in route_table
-        q.push(nxt);
+        if (nxt_dm_id == current_domain_id)
+          q.push(nxt);
       }
 
       if (this->vis[nxt] == this->vis[cur] + 1) {

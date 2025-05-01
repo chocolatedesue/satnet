@@ -31,9 +31,9 @@ public:
   calcE2ePath(int src, int dst,
               const std::vector<std::vector<int>> &route_tables) ;
   virtual const std::vector<int> &getRouteTable() const { return route_table; }
-  virtual const int &getDirectionByIdInRouteTable(int id) const {
-    return route_table[id];
-  }
+// virtual const int &getDirectionByIdInRouteTable(int id) const {
+//     return route_table[id];
+//   }
 };
 
 // 定义一个概念：T 必须“派生自” BaseNode（或就是 BaseNode）

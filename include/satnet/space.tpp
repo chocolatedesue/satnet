@@ -157,9 +157,18 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_cur_banned() {
 
 template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_futr_banned() {
   clearIslState(GlobalConfig::futr_banned);
-  for (int futr_time = cur_time; futr_time < cur_time + update_period &&
-                                 futr_time < start_time + duration;
+  // for (int futr_time = cur_time; futr_time < cur_time + update_period - step
+  // &&
+  //                                futr_time < start_time + duration;
+  //      futr_time += step) {
+  //   readIslStateFlie(futr_time, GlobalConfig::futr_banned);
+  // }
+
+  for (int futr_time = cur_time; futr_time < cur_time + update_period ;
        futr_time += step) {
+    if (futr_time >= start_time + duration) {
+      break;
+    }
     readIslStateFlie(futr_time, GlobalConfig::futr_banned);
   }
 }
@@ -182,6 +191,8 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
     load_sat_lla();
     // load_sat_vel();
 
+    double pre_compute_time = 0.0;
+    int total_diff_count = 0;
     if (cur_time % update_period == 0 || is_sp_update) {
 
       if (!is_specical_cal && cur_time % update_period != 0) {
@@ -190,10 +201,10 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       }
       load_futr_banned();
       // 替换注释掉的聚合代码
-      double total_compute_time = 0.0;
-      int total_diff_count = 0;
+      pre_compute_time = 0.0;
+      total_diff_count = 0;
 
-#pragma omp parallel for reduction(+ : total_compute_time, total_diff_count)
+#pragma omp parallel for reduction(+ : pre_compute_time, total_diff_count)
       for (int i = 0; i < GlobalConfig::N; i++) {
         auto &node = nodes[i];
         auto &cur_table = route_tables[i];
@@ -205,7 +216,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
             compute_end - compute_start);
         auto elapsed_ms =
             elapsed.count() / 1000.0; // Convert microseconds to milliseconds
-        total_compute_time += elapsed_ms;
+        pre_compute_time += elapsed_ms;
 
         auto &new_table = node->getRouteTable();
         int diff = 0;
@@ -222,10 +233,16 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       }
 
       // 单次添加汇总数据，避免循环
-      compute_time_result.add(total_compute_time / GlobalConfig::N);
+      // compute_time_result.add(total_compute_time / GlobalConfig::N);
       if (cur_time != start_time) {
+
         update_entry_result.add(static_cast<double>(total_diff_count) /
                                 GlobalConfig::N);
+        total_diff_count = 0;
+
+        compute_time_result.add(pre_compute_time / GlobalConfig::N);
+
+        pre_compute_time = 0;
       }
     }
 
@@ -247,6 +264,8 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
     //   continue;
     // }
 
+    double e2e_path_compute_time = 0;
+
     for (int i = 0; i < GlobalConfig::num_observers; i++) {
 
       auto src = GlobalConfig::latency_observers[i].first;
@@ -258,8 +277,16 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       //     (cur_time > 4201 && cur_time < 6100)) {
       //   std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
       // }
-
+      auto compute_start = std::chrono::high_resolution_clock::now();
       std::tie(latency, success) = T::calcE2ePath(src, dst, route_tables);
+      auto compute_end = std::chrono::high_resolution_clock::now();
+      auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
+          compute_end - compute_start);
+      auto elapsed_ms =
+          elapsed.count() / 1000.0; // Convert microseconds to milliseconds
+      // if (cur_time % update_period == 0)
+      e2e_path_compute_time += elapsed_ms;
+
       logger->debug(
           "Calculate latency from {} to {}: {} ms, success: {} at time {}", src,
           dst, latency, success, cur_time);
@@ -289,6 +316,11 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
           fclose(fout);
         }
       }
+    }
+    if (e2e_path_compute_time != 0) {
+      compute_time_result.add(e2e_path_compute_time /
+                              GlobalConfig::num_observers);
+      e2e_path_compute_time = 0;
     }
   }
   report();
