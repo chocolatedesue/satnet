@@ -133,6 +133,9 @@ void loadObserverConfig(std::string observer_config_path) {
   for (int i = 0; i < GlobalConfig::num_observers; i++) {
     int src, dst;
     ifs >> src >> dst;
+    if (src > dst) {
+      std::swap(src, dst);
+    }
     GlobalConfig::latency_observers.push_back(std::make_pair(src, dst));
   }
 }
@@ -266,4 +269,14 @@ int is_forwarder(int u) {
   return banned_cnt > 1;
 }
 
-const int MAX_RECURSE_CNT = 10000;
+const int MAX_RECURSE_CNT = 100000;
+
+int getInverseDirection(int dir) {
+  // If dir is 1 or 2, add 2
+  // If dir is 3 or 4, subtract 2
+  if (dir <= 2) {
+    return dir + 2;
+  } else {
+    return dir - 2;
+  }
+}

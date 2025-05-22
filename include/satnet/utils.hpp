@@ -12,6 +12,14 @@
 // --- 类型定义 ---
 enum Direction { UP = 1, RIGHT = 2, DOWN = 3, LEFT = 4 };
 
+enum InvDirection {
+  UP_INV = 3,
+  RIGHT_INV = 4,
+  DOWN_INV = 1,
+  LEFT_INV = 2
+};
+
+int getInverseDirection(int dir) ;
 // --- 函数声明 ---
 int check_lla_status();
 double getDist(int a, int b); // 移除 static

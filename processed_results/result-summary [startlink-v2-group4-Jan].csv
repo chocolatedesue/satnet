@@ -1,0 +1,3 @@
+Algorithm Name,Compute Time (s),Update Entry (#),Update Entry (Relative %),Failure Rate (%),Avg Latency (ms),Avg Latency (Relative %),P50 Latency (ms),P50 Latency (Relative %),P90 Latency (ms),P90 Latency (Relative %),P99 Latency (ms),P99 Latency (Relative %)
+"GSPR",2.20,72.82,+0.00%,0.0000%,52.75,+0.00%,51.76,+0.00%,89.75,+0.00%,107.84,+0.00%
+"MHR",0.42,3.86,-94.70%,0.0000%,56.47,+7.05%,54.23,+4.75%,99.19,+10.51%,124.09,+15.07%

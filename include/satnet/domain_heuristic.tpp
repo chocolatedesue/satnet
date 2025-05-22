@@ -172,6 +172,7 @@ double DomainHeuristicNode<Kp, Kn>::calcDomainHeuristicScore(int src_dmid,
   //              std::abs(p_d - p_s + GlobalConfig::P) % GlobalConfig::P);
 
   return static_cast<double>(-(vertical_dist * 4 + horizontal_dist));
+  // return static_cast<double>(-(vertical_dist + horizontal_dist));
 }
 
 template <int Kp, int Kn>
@@ -189,6 +190,8 @@ double DomainHeuristicNode<Kp, Kn>::calcEdgeNodeHeuristicScore(int src,
                std::abs(p_d - p_s + GlobalConfig::P) % GlobalConfig::P);
 
   return static_cast<double>(-(vertical_dist * 4 + horizontal_dist));
+
+  // return  static_cast<double>(-(vertical_dist  + horizontal_dist));
 }
 
 template <int Kp, int Kn>
@@ -197,6 +200,12 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
     std::vector<bool> &visited, double current_cost, bool prefer_right,
     bool prefer_down, int target_domain_i, int target_domain_j,
     const std::vector<std::vector<int>> &route_tables, int &recursion_depth) {
+
+  int current_domain_id = calculateDomainId(current);
+  if (visited[current_domain_id
+  ]) {
+    return std::make_pair(-1, false);
+  }
 
   auto logger = spdlog::get(global_logger_name);
   recursion_depth++;
@@ -225,11 +234,10 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
   }
 
   // Mark current node as visited
-  visited[current] = true;
+  visited[current_domain_id] = true;
 
   // Calculate current domain coordinates and ID
   const auto [current_domain_i, current_domain_j] = calcDomainCoords(current);
-  int current_domain_id = calculateDomainId(current);
 
   // Check if we've reached the target domain
   if (current_domain_i == target_domain_i &&
@@ -242,7 +250,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
       return std::make_pair(current_cost + domain_result.first, true);
     } else {
       // Backtrack if no path found
-      visited[current] = false;
+      visited[current_domain_id] = false;
       return std::make_pair(-1, false);
     }
   }
@@ -255,20 +263,21 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
   // Evaluate each possible direction (1=up, 2=right, 3=down, 4=left)
   for (int direction = 1; direction <= 4; direction++) {
     // Skip if no border nodes in this direction
-    if (border_nodes[current_domain_id][direction].empty() || banned_links[current][direction] == 1) {
+    if (previous_direction == getInverseDirection(direction))
       continue;
-    }
 
-    // Use the first border node to estimate the domain we'd reach
     int sample_border_node = border_nodes[current_domain_id][direction][0];
     int next_node = move(sample_border_node, direction);
-
-    // Skip if move would be invalid
     if (next_node == -1) {
       continue;
     }
-
     int next_domain_id = calculateDomainId(next_node);
+
+    if (border_nodes[current_domain_id][direction].empty() ||
+        visited[next_domain_id]) {
+      continue;
+    }
+
     double heuristic_score =
         calcDomainHeuristicScore(next_domain_id, destination_domain_id);
     direction_scores[direction] = heuristic_score;
@@ -331,7 +340,7 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
       //   // Skip if route doesn't exist, link is banned, or node already
       //   visited
       if (!route_tables[current][border_node] ||
-          banned_links[border_node][direction] == 1 || visited[border_node]) {
+          banned_links[border_node][direction] == 1) {
         continue;
       }
 
@@ -355,12 +364,13 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
       //   // Find the node in the next domain
       int next_domain_node = move(border_node, direction);
 
-      if (next_domain_node == -1 || visited[next_domain_node]) {
+      if (next_domain_node == -1) {
         continue;
       }
 
       // visited[next_domain_node] = true;
-      visited[border_node] = true;
+      // visited[border_node] = true;
+      
 
       //   // Recursively try to find a path from the next domain
       double new_cost =
@@ -374,11 +384,11 @@ std::pair<double, bool> DomainHeuristicNode<Kp, Kn>::searchPathRecursively(
       if (path_found) {
         return std::make_pair(final_cost, true);
       }
-      visited[border_node] = false;
+      // visited[border_node] = false;
     }
   }
   // Backtrack: mark current node as unvisited
-  visited[current] = false;
+  visited[current_domain_id] = false;
 
   // All directions failed, return failure result
   return std::make_pair(-1, false);
@@ -471,7 +481,7 @@ template <int Kp, int Kn> void DomainHeuristicNode<Kp, Kn>::compute() {
   }
 
   const auto &banned =
-      GlobalConfig::cur_banned; // Assuming pointer access is correct
+      GlobalConfig::futr_banned; // Assuming pointer access is correct
 
   auto logger = spdlog::get(global_logger_name);
 

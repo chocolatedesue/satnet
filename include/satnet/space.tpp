@@ -164,7 +164,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::load_futr_banned() {
   //   readIslStateFlie(futr_time, GlobalConfig::futr_banned);
   // }
 
-  for (int futr_time = cur_time; futr_time < cur_time + update_period ;
+  for (int futr_time = cur_time; futr_time < cur_time + update_period;
        futr_time += step) {
     if (futr_time >= start_time + duration) {
       break;
@@ -185,6 +185,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
   bool is_sp_update =
       algorithm_name.find("DomainHeuristic") != std::string::npos;
   // is_sp_update = true;
+  is_sp_update = false;
   for (; cur_time < start_time + duration; cur_time += step) {
     load_cur_banned();
     load_sat_pos();
@@ -270,6 +271,12 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
 
       auto src = GlobalConfig::latency_observers[i].first;
       auto dst = GlobalConfig::latency_observers[i].second;
+
+      if (src > dst) {
+        logger->warn(
+            "Error: src > dst in latency observer config, swapping values");
+        std::swap(src, dst);
+      }
       double latency = -1;
       bool success = false;
 
@@ -290,7 +297,7 @@ template <DerivedFromBaseNode T> void SpaceSimulation<T>::run() {
       logger->debug(
           "Calculate latency from {} to {}: {} ms, success: {} at time {}", src,
           dst, latency, success, cur_time);
-      logger->flush();
+      // logger->flush();
       if (success) {
         GlobalConfig::failure_rates[i].add(0);
         GlobalConfig::latency_results[i].add(latency);

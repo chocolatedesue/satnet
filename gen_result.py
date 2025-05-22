@@ -48,8 +48,8 @@ TARGET_LIST = ["startlink-v2-group5-Apr", "startlink-v2-group5-Jan", "startlink-
 ALGORITHMS_TO_OUTPUT: List[str] = [
     "DijkstraPred",         # Corresponds to GSPR
     "MinHopCountPred",      # Corresponds to MHR
-    "DomainHeuristic_2_2",
-    "DomainHeuristic_7_20",
+    "DomainHeuristic_2_3",
+    "DomainHeuristic_7_10", 
     "DomainHeuristic_14_60",
 ]
 

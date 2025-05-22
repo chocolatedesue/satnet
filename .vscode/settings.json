@@ -1,0 +1,12 @@
+{
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}",
+    ],
+    "go.goroot": "/home/cnic/.local/share/mise/installs/go/1.24.3",
+    "debug.javascript.defaultRuntimeExecutable": {
+        "pwa-node": "/home/cnic/.local/share/mise/shims/node"
+    },
+    "go.alternateTools": {
+        "go": "/home/cnic/.local/share/mise/shims/go"
+    }
+}

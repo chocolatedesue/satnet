@@ -64,4 +64,6 @@ CMakeUserPresets.json
 tmp/
 output/
 plot_data/
-log.txt
+log*.txt
+
+*.png

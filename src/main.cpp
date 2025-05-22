@@ -8,6 +8,7 @@
 // --- Include all your algorithm headers here ---
 #include "satnet/base.hpp"
 #include "satnet/dijkstra.hpp"
+#include "satnet/domain_no_opt.hpp"
 #include "satnet/domain_heuristic.hpp"
 #include "satnet/minhopcount.hpp"
 #include "satnet/space.hpp"
@@ -36,6 +37,11 @@ enum class AlgorithmId {
   DOMAIN_HEURISTIC_NODE_1_2 = 207,
   DOMAIN_HEURISTIC_NODE_2_1 = 208,
   DOMAIN_HEURISTIC_NODE_1_1 = 209,
+  DOMAIN_HEURISTIC_NODE_2_3 = 210,
+  DOMAIN_HEURISTIC_NODE_4_3 = 211,
+  DOMAIN_HEURISTIC_NODE_1_3 = 212,
+
+  DOMAIN_NODE_NO_OPT = 300,
 
   // {AlgorithmId::NEW_ALGORITHM_NODE, {"NewAlgorithm", runNewAlgorithm}},
   // Add more algorithms as needed
@@ -165,6 +171,28 @@ getAlgorithmRegistry() {
             [](const std::string &cfg) {
               runSimulation<DomainHeuristicNode<1, 1>>(cfg);
             }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_2_3,
+           {"DomainHeuristicNode<2, 3>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<2, 3>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_4_3,
+           {"DomainHeuristicNode<4, 3>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<4, 3>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_HEURISTIC_NODE_1_3,
+           {"DomainHeuristicNode<1, 3>",
+            [](const std::string &cfg) {
+              runSimulation<DomainHeuristicNode<1, 3>>(cfg);
+            }}},
+          {satnet::AlgorithmId::DOMAIN_NODE_NO_OPT,
+            {"DomainNodeNoOpt",
+              [](const std::string &cfg) {
+                runSimulation<DomainNodeNoOpt>(cfg);
+              }}},
+          // Add more algorithms as needed
+
 
           /* Example for adding a new algorithm:
           {satnet::AlgorithmId::NEW_ALGORITHM_NODE,

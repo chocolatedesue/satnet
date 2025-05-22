@@ -17,8 +17,8 @@
 # 202: DomainHeuristicNode<7, 20>
 # 206: DomainHeuristicNode<14, 60>
 ALGORITHM_IDS_TO_RUN=(
-    101
-    152
+    # 101
+    # 152
     205
     202
     206
